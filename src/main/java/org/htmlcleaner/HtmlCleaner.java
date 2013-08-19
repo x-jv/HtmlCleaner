@@ -395,6 +395,10 @@ public class HtmlCleaner {
         return clean(in, properties.getCharset());
     }
     
+    public TagNode clean(Reader reader) throws IOException {
+        return clean(reader, new CleanTimeValues());
+    }
+    
     /**
      * Basic version of the cleaning call.
      * @param reader (not closed)
