@@ -405,7 +405,7 @@ public class HtmlCleaner {
      * @return An instance of TagNode object which is the root of the XML tree.
      * @throws IOException
      */
-    public TagNode clean(Reader reader, final CleanTimeValues cleanTimeValues) throws IOException {
+    protected TagNode clean(Reader reader, final CleanTimeValues cleanTimeValues) throws IOException {
         pushNesting(cleanTimeValues);
         cleanTimeValues._headOpened = false;
         cleanTimeValues._bodyOpened = false;
@@ -1020,15 +1020,15 @@ public class HtmlCleaner {
         return properties;
     }
 
-    public Set<ITagNodeCondition> getPruneTagSet(CleanTimeValues cleanTimeValues) {
+    protected Set<ITagNodeCondition> getPruneTagSet(CleanTimeValues cleanTimeValues) {
         return cleanTimeValues.pruneTagSet;
     }
 
-    public Set<ITagNodeCondition> getAllowTagSet(CleanTimeValues cleanTimeValues) {
+    protected Set<ITagNodeCondition> getAllowTagSet(CleanTimeValues cleanTimeValues) {
         return cleanTimeValues.allowTagSet;
     }
 
-    public void addPruneNode(TagNode node, CleanTimeValues cleanTimeValues) {
+    protected void addPruneNode(TagNode node, CleanTimeValues cleanTimeValues) {
     	node.setPruned(true);
     	cleanTimeValues.pruneNodeSet.add(node);
     }
@@ -1059,7 +1059,7 @@ public class HtmlCleaner {
         return false;
     }
 
-    public Set<String> getAllTags(CleanTimeValues cleanTimeValues) {
+    protected Set<String> getAllTags(CleanTimeValues cleanTimeValues) {
 		return cleanTimeValues.allTags;
 	}
 
