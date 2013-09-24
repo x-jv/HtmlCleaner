@@ -75,6 +75,8 @@ public class HtmlTokenizer {
     private boolean _asExpected = true;
 
     private boolean _isScriptContext;
+    
+    private boolean _isCDATA = false;
 
     private HtmlCleaner cleaner;
     private CleanerProperties props;
@@ -690,7 +692,30 @@ public class HtmlTokenizer {
         while ( !isAllRead() ) {
             saveCurrent();
             go();
-            if (isTagStartOrEnd()) {
+            
+            //
+            // Comments within a script - we skip the 
+            // following whitespace so we can check for a
+            // CDATA section marker without creating a
+            // new text node
+            //
+            if (startsWith("//") || startsWith("/*")){
+            	skipWhitespaces();
+            }
+            
+            if (startsWith("<![CDATA[") || startsWith("&lt;![CDATA[")) {
+                _isCDATA = true;
+            }
+            
+            else if (startsWith("]]>") || startsWith("]]&gt;") ) {
+         	   _isCDATA = false;
+            }  
+           
+            //
+            // Don't create a new content node when encountering
+            // a < or > if we're still in a CDATA section
+            //
+            if (isTagStartOrEnd() && !_isCDATA) {
                 break;
             }
         }

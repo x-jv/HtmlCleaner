@@ -61,7 +61,13 @@ public class SimpleXmlSerializer extends XmlSerializer {
             if (dontEscape) {
                 writer.write( content.substring(0, pos).replaceAll("]]>", "]]&gt;") );
             } else {
-                if (trimmed.startsWith(BEGIN_CDATA)) {
+            	//
+            	// we used create a new content node whenever encountering a CDATA start
+            	// however we can also find a CDATA start *within* a content node so
+            	// we need to check whether the node contains a CDATA start marker not
+            	// just if it starts with one.
+            	//
+                if (trimmed.contains(BEGIN_CDATA)) {                	
                     int actualStart = content.indexOf(BEGIN_CDATA) + BEGIN_CDATA.length();
                     writer.write(content.substring(0, actualStart));
                     writer.write( escapeXml(content.substring(actualStart, pos)));
