@@ -60,18 +60,37 @@ public class DomSerializer {
     private static final Pattern CDATA_PATTERN =
         Pattern.compile("<!\\[CDATA\\[.*(\\]\\]>|<!\\[CDATA\\[)", Pattern.DOTALL);
 
+    /**
+     * The HTML Cleaner properties set by the user to control the HTML cleaning.
+     */
     protected CleanerProperties props;
+    
+    /**
+     * Whether XML entities should be escaped or not.
+     */
     protected boolean escapeXml = true;
 
+    /**
+     * @param props the HTML Cleaner properties set by the user to control the HTML cleaning.
+     * @param escapeXml if true then escape XML entities
+     */
     public DomSerializer(CleanerProperties props, boolean escapeXml) {
         this.props = props;
         this.escapeXml = escapeXml;
     }
 
+    /**
+     * @param props the HTML Cleaner properties set by the user to control the HTML cleaning.
+     */
     public DomSerializer(CleanerProperties props) {
         this(props, true);
     }
 
+    /**
+     * @param rootNode the HTML Cleaner root node to serialize
+     * @return the W3C Document object
+     * @throws ParserConfigurationException if there's an error during serialization
+     */
     public Document createDOM(TagNode rootNode) throws ParserConfigurationException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -160,6 +179,10 @@ public class DomSerializer {
         return contentResult;
     }
 
+    /**
+     * @param element the element to check
+     * @return true if the passed element is a script or style element
+     */
     protected boolean isScriptOrStyle(Element element) {
         String tagName = element.getNodeName();
         return "script".equalsIgnoreCase(tagName) || "style".equalsIgnoreCase(tagName);
@@ -175,6 +198,13 @@ public class DomSerializer {
         return props.isUseCdataForScriptAndStyle() && isScriptOrStyle(element) && !element.hasChildNodes();
     }
     
+    /**
+     * Serialize a given HTML Cleaner node.
+     * 
+     * @param document the W3C Document to use for creating new DOM elements
+     * @param element the W3C element to which we'll add the subnodes to
+     * @param tagChildren the HTML Cleaner nodes to serialize for that node
+     */
     private void createSubnodes(Document document, Element element, List tagChildren) {
     	StringBuffer bufferedContent = new StringBuffer();
     	
