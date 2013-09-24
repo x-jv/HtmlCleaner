@@ -180,6 +180,9 @@ public class DomSerializer {
     	
     	if (tagChildren != null) {
             for(Object item : tagChildren) {
+            	
+            	flushContent(document, element, bufferedContent, item);
+            	
                 if (item instanceof CommentNode) {
                     CommentNode commentNode = (CommentNode) item;
                     Comment comment = document.createComment( commentNode.getContent() );
