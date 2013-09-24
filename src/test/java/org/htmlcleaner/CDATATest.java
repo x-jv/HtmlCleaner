@@ -47,13 +47,65 @@ public class CDATATest {
     {
         cleaner = new HtmlCleaner();
     }
+
+    
+    @Test
+    public void nonSafeCDATA(){
+    	String testData = ""
+        	+ "<script type=\"text/javascript\">"
+        	+ "<![CDATA[\n"
+        	+ "function helloWorld() {\n"
+        	+ "};\n"
+        	+ "]]>\n"
+        	+ "</script>";
+        	
+        	TagNode cleaned = cleaner.clean(testData);
+        	TagNode script = cleaned.findElementByName("script", true);
+        	
+        	
+        	//
+        	// We should have a CData node for the CDATA section
+        	//
+        	assertTrue(script.getAllChildren().get(0) instanceof CData);
+        	CData cdata = (CData)script.getAllChildren().get(0);
+        	
+        	String content = cdata.getContentWithoutStartAndEndTokens();
+        	assertEquals("\nfunction helloWorld() {\n};\n", content);
+    }
+    
+    @Test
+    public void safeOutput(){
+    	String testData = ""
+        	+ "<script type=\"text/javascript\">"
+        	+ "<![CDATA[\n"
+        	+ "function helloWorld() {\n"
+        	+ "};\n"
+        	+ "]]>\n"
+        	+ "</script>";
+        	
+        	TagNode cleaned = cleaner.clean(testData);
+        	TagNode script = cleaned.findElementByName("script", true);
+        	
+        	
+        	//
+        	// We should have a CData node for the CDATA section
+        	//
+        	assertTrue(script.getAllChildren().get(0) instanceof CData);
+        	CData cdata = (CData)script.getAllChildren().get(0);
+        	
+        	String content = cdata.getContentWithoutStartAndEndTokens();
+        	assertEquals("\nfunction helloWorld() {\n};\n", content);
+        	
+        	String safeContent = cdata.getContent();
+        	assertEquals("/*<![CDATA[*/\nfunction helloWorld() {\n};\n/*]]>*/", safeContent);
+    }
     
     /**
      * For a CDATA section we need to ignore '<' and '>' and keep going to keep the content
-     * within a single ContentNode.
+     * within a single CData instance.
      */
     @Test
-    public void dontBreakCDATA(){
+    public void safeCDATAAlternate(){
     	String testData = ""
         	+ "<script type=\"text/javascript\">\n"
         	+ "// <![CDATA[\n"
@@ -66,15 +118,58 @@ public class CDATATest {
         	
         	TagNode cleaned = cleaner.clean(testData);
         	TagNode script = cleaned.findElementByName("script", true);
-
-        	String content = (((ContentNode)script.getAllChildren().get(0)).getContent());
+        	
         	
         	//
-        	// We should have a single content node for the whole CDATA section
+        	// We should have a CData node for the CDATA section
         	//
-        	assertTrue(script.getAllChildren().get(0) instanceof ContentNode);
-        	assertEquals(1, script.getAllChildren().size());
-        	assertEquals("\n// <![CDATA[\nfunction escapeForXML(origtext) {\n return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n .replace(/>/g,'&'+'gt;').replace(/'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');}\n// ]]>\n", content);
+        	assertTrue(script.getAllChildren().get(0) instanceof CData);
+        	CData cdata = (CData)script.getAllChildren().get(0);
+        	
+        	String content = cdata.getContentWithoutStartAndEndTokens();
+        	assertEquals("\nfunction escapeForXML(origtext) {\n return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n .replace(/>/g,'&'+'gt;').replace(/'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');}\n", content);
+    }
+    
+    /**
+     * For a CDATA section we need to ignore '<' and '>' and keep going to keep the content
+     * within a single CData instance
+     */
+    @Test
+    public void safeCDATA(){
+    	String testData = ""
+        	+ "<script type=\"text/javascript\">\n"
+        	+ "/*<![CDATA[*/\n"
+        	+ "function escapeForXML(origtext) {\n"
+        	+ " return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n"
+        	+ " .replace(/>/g,'&'+'gt;').replace(/\'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');"
+        	+ "}\n"
+        	+ "/*]]>*/>\n"
+        	+ "</script>";
+        	
+        	TagNode cleaned = cleaner.clean(testData);
+        	TagNode script = cleaned.findElementByName("script", true);
+        	
+        	
+        	//
+        	// We should have a CData node for the CDATA section
+        	//
+        	assertTrue(script.getAllChildren().get(0) instanceof CData);
+        	CData cdata = (CData)script.getAllChildren().get(0);
+        	
+        	String content = cdata.getContentWithoutStartAndEndTokens();
+        	assertEquals("\nfunction escapeForXML(origtext) {\n return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n .replace(/>/g,'&'+'gt;').replace(/'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');}\n", content);
+    }
+    
+    @Test
+    public void style(){
+    	String testData = "<style type=\"text/css\">/*<![CDATA[*/\n#ampmep_188 { }\n/*]]>*/</style>";
+    	TagNode cleaned = cleaner.clean(testData);
+    	TagNode style = cleaned.findElementByName("style", true);
+    	
+    	String content = (((CData)style.getAllChildren().get(0)).getContentWithoutStartAndEndTokens());
+    	assertTrue(style.getAllChildren().get(0) instanceof CData);
+    	assertEquals("\n#ampmep_188 { }\n", content);
+
     }
 
 }

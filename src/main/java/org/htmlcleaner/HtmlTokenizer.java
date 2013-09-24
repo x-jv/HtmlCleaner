@@ -75,8 +75,6 @@ public class HtmlTokenizer {
     private boolean _asExpected = true;
 
     private boolean _isScriptContext;
-    
-    private boolean _isCDATA = false;
 
     private HtmlCleaner cleaner;
     private CleanerProperties props;
@@ -366,6 +364,8 @@ public class HtmlTokenizer {
                     tagEnd();
                 } else if ( isScriptEmpty && startsWith("<!--") ) {
                     comment();
+                } else if ( startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) { 
+                	cdata();
                 } else {
                     boolean isTokenAdded = content();
                     if (isScriptEmpty && isTokenAdded) {
@@ -690,34 +690,21 @@ public class HtmlTokenizer {
 
     private boolean content() throws IOException {
         while ( !isAllRead() ) {
+
+            if (startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) {
+            	cdata();
+            	break;
+            }
+            
             saveCurrent();
             go();
             
-            //
-            // Comments within a script - we skip the 
-            // following whitespace so we can check for a
-            // CDATA section marker without creating a
-            // new text node
-            //
-            if (startsWith("//") || startsWith("/*")){
-            	skipWhitespaces();
-            }
-            
-            if (startsWith("<![CDATA[") || startsWith("&lt;![CDATA[")) {
-                _isCDATA = true;
-            }
-            
-            else if (startsWith("]]>") || startsWith("]]&gt;") ) {
-         	   _isCDATA = false;
-            }  
-           
-            //
-            // Don't create a new content node when encountering
-            // a < or > if we're still in a CDATA section
-            //
-            if (isTagStartOrEnd() && !_isCDATA) {
+            if (isTagStartOrEnd()) {
                 break;
             }
+            
+
+            
         }
 
         return addSavedAsContent();
@@ -774,6 +761,42 @@ public class HtmlTokenizer {
         	}
             _saved.delete(0, _saved.length());
         }
+    }
+    
+    private void cdata() throws IOException {
+        
+    	if (startsWith(CData.SAFE_BEGIN_CDATA)){
+    		go(CData.SAFE_BEGIN_CDATA.length());
+    	} else if (startsWith(CData.SAFE_BEGIN_CDATA_ALT)){
+    		go (CData.SAFE_BEGIN_CDATA_ALT.length());
+    	} else {
+    		go(CData.BEGIN_CDATA.length());
+    	}
+    	
+    	int cdataStart = _saved.length();
+    	
+        while ( !isAllRead() && !startsWith(CData.SAFE_END_CDATA) && !startsWith(CData.END_CDATA) && !startsWith(CData.SAFE_END_CDATA_ALT) ) {
+            saveCurrent();
+            go();
+        }
+
+        
+        if (startsWith(CData.SAFE_END_CDATA)){
+        	go(CData.SAFE_END_CDATA.length());
+        }
+        else if (startsWith(CData.SAFE_END_CDATA_ALT)){
+        	go(CData.SAFE_END_CDATA_ALT.length());
+        }
+        else if (startsWith(CData.END_CDATA)) {
+        	go(CData.END_CDATA.length());
+        }
+
+        if (_saved.length() > 0) {
+        		String cdata = _saved.toString().substring(cdataStart);
+        		addToken( new CData(cdata) );
+        }
+        _saved.delete(cdataStart, _saved.length());
+
     }
 
     private void doctype() throws IOException {

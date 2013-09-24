@@ -45,8 +45,8 @@ import java.io.Writer;
  */
 public class ContentNode extends BaseTokenImpl implements HtmlNode {
 
-    private final String content;
-    private final boolean blank;
+    protected final String content;
+    protected final boolean blank;
 
     public ContentNode(String content) {
         this.content = content;

@@ -59,7 +59,7 @@ public class DomSerializerTest {
     	+ " return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n"
     	+ " .replace(/>/g,'&'+'gt;').replace(/\'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');"
     	+ "}\n"
-    	+ "// ]]>\n"
+    	+ "// ]]>"
     	+ "</script>";
     	
     	TagNode cleaned = cleaner.clean(testData);
@@ -73,12 +73,9 @@ public class DomSerializerTest {
     	// The content of the script tag should be CDATA
     	assertEquals("#cdata-section", output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getChildNodes().item(0).getNodeName());
     	
-    	// We shouldn't have any other child nodes
-    	assertEquals(1, output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getChildNodes().getLength());
-    	
     	// The value of the CDATA section should be as expected from the input
     	String content = output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getChildNodes().item(0).getNodeValue();
-    	assertEquals("\n// <![CDATA[\nfunction escapeForXML(origtext) {\n return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n .replace(/>/g,'&'+'gt;').replace(/'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');}\n// ]]>\n", content);    	
+    	assertEquals("\nfunction escapeForXML(origtext) {\n return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n .replace(/>/g,'&'+'gt;').replace(/'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');}\n", content);    	
     }
   
 	

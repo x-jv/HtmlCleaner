@@ -51,10 +51,14 @@ public class SimpleXmlSerializer extends XmlSerializer {
 		super(props);
 	}
 
+	protected void serializeCData(CData item, TagNode tagNode, Writer writer) throws IOException{
+			writer.write(item.getContent());
+	}
+	
 	protected void serializeContentToken(ContentNode item, TagNode tagNode, Writer writer) throws IOException {
         String content = item.getContent();
         String trimmed = content.trim();
-        boolean dontEscape = dontEscape(tagNode);                        
+        boolean dontEscape = dontEscape(tagNode);
         if (trimmed.endsWith(SAFE_END_CDATA)) {
             int pos = content.lastIndexOf(SAFE_END_CDATA);
             String ending = content.substring(pos);
@@ -95,7 +99,9 @@ public class SimpleXmlSerializer extends XmlSerializer {
             while ( childrenIt.hasNext() ) {
                 Object item = childrenIt.next();
                 if (item != null) {
-                    if ( item instanceof ContentNode ) {
+                	if (item instanceof CData) {
+                		serializeCData((CData)item, tagNode, writer);
+                	} else if ( item instanceof ContentNode ) {
                         serializeContentToken((ContentNode)item, tagNode, writer);
                     } else {
                         ((BaseToken)item).serialize(this, writer);
