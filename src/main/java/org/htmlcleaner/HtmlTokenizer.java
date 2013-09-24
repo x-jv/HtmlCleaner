@@ -398,7 +398,7 @@ public class HtmlTokenizer {
             		_isLateForDoctype = true;
             		tagStart();
             	} else if ( props.isIgnoreQuestAndExclam() && (startsWith("<!") || startsWith("<?")) ) {
-            		ignoreUntil('>');
+            		ignoreUntil('<');
             		if (isChar('>')) {
             			go();
             		}
