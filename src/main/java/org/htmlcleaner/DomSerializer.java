@@ -1,5 +1,39 @@
+/*  Copyright (c) 2006-2013, the HtmlCleaner Project
+    All rights reserved.
+
+    Redistribution and use of this software in source and binary forms,
+    with or without modification, are permitted provided that the following
+    conditions are met:
+
+    * Redistributions of source code must retain the above
+      copyright notice, this list of conditions and the
+      following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the
+      following disclaimer in the documentation and/or other
+      materials provided with the distribution.
+
+    * The name of HtmlCleaner may not be used to endorse or promote
+      products derived from this software without specific prior
+      written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+    ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
+*/
+
 package org.htmlcleaner;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.w3c.dom.Comment;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -12,11 +46,19 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>DOM serializer - creates xml DOM.</p>
  */
 public class DomSerializer {
+	
+    /**
+     * The Regex Pattern to recognize a CDATA block.
+     */
+    private static final Pattern CDATA_PATTERN =
+        Pattern.compile("<!\\[CDATA\\[.*(\\]\\]>|<!\\[CDATA\\[)", Pattern.DOTALL);
 
     protected CleanerProperties props;
     protected boolean escapeXml = true;
@@ -57,6 +99,66 @@ public class DomSerializer {
 
         return document;
     }
+    
+    /**
+     * Perform CDATA transformations if the user has specified to use CDATA inside scripts and style elements.
+     * 
+     * @param document the W3C Document to use for creating new DOM elements
+     * @param element the W3C element to which we'll add the text content to
+     * @param bufferedContent the buffered text content on which we need to perform the CDATA transformations
+     * @param item the current HTML Cleaner node being processed
+     */
+    private void flushContent(Document document, Element element, StringBuffer bufferedContent, Object item)
+    {
+        if (bufferedContent.length() > 0 && !(item instanceof ContentNode)) {
+            // Flush the buffered content
+            boolean specialCase = this.props.isUseCdataForScriptAndStyle() && isScriptOrStyle(element);
+            String content = bufferedContent.toString();
+
+            if (this.escapeXml && !specialCase) {
+                content = Utils.escapeXml(content, this.props, true);
+            } else if (specialCase) {
+                content = processCDATABlocks(content);
+            }
+
+            // Generate a javascript comment in front on the CDATA block so that it works in IE6 and when
+            // serving XHTML under a mimetype of HTML.
+            if (specialCase) {
+                element.appendChild(document.createTextNode("//"));
+                element.appendChild(document.createCDATASection("\n" + content + "\n//"));
+            } else {
+                element.appendChild(document.createTextNode(content));
+            }
+
+            bufferedContent.setLength(0);
+        }
+    }
+    
+    /**
+     * Remove any existing CDATA section and unencode HTML entities that are not inside a CDATA block.
+     * 
+     * @param content the text input to transform
+     * @return the transformed content that will be wrapped inside a CDATA block
+     */
+    private String processCDATABlocks(String content)
+    {
+        StringBuffer result = new StringBuffer();
+        Matcher matcher = CDATA_PATTERN.matcher(content);
+        int cursor = 0;
+        while (matcher.find()) {
+            result.append(StringEscapeUtils.unescapeHtml4(content.substring(cursor, matcher.start())));
+            result.append(content.substring(matcher.start() + 9, matcher.end() - matcher.group(1).length()));
+            cursor = matcher.end() - matcher.group(1).length() + 3;
+        }
+        // Copy the remaining text data in the result buffer
+        if (cursor < content.length()) {
+            result.append(StringEscapeUtils.unescapeHtml4(content.substring(cursor)));
+        }
+        // Ensure ther's no invalid <![CDATA[ or ]]> remaining.
+        String contentResult = result.toString().replace("<![CDATA[", "").replace("]]>", "");
+
+        return contentResult;
+    }
 
     protected boolean isScriptOrStyle(Element element) {
         String tagName = element.getNodeName();
@@ -72,8 +174,11 @@ public class DomSerializer {
         // TODO check for blank content as well.
         return props.isUseCdataForScriptAndStyle() && isScriptOrStyle(element) && !element.hasChildNodes();
     }
+    
     private void createSubnodes(Document document, Element element, List tagChildren) {
-        if (tagChildren != null) {
+    	StringBuffer bufferedContent = new StringBuffer();
+    	
+    	if (tagChildren != null) {
             for(Object item : tagChildren) {
                 if (item instanceof CommentNode) {
                     CommentNode commentNode = (CommentNode) item;
@@ -111,6 +216,7 @@ public class DomSerializer {
                     createSubnodes(document, element, sublist);
                 }
             }
+            flushContent(document, element, bufferedContent, null);
         }
     }
 
