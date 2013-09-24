@@ -26,6 +26,26 @@ public class HtmlCleanerTest extends TestCase {
     }
 
     /**
+     * This is to test issue #67
+     */
+    public void testXmlNoExtraWhitesapce(){
+        CleanerProperties cleanerProperties = new CleanerProperties();
+        cleanerProperties.setOmitXmlDeclaration(false);
+        cleanerProperties.setOmitDoctypeDeclaration(false);
+        cleanerProperties.setIgnoreQuestAndExclam(true);
+        cleanerProperties.setAddNewlineToHeadAndBody(false);
+ 
+    	HtmlCleaner theCleaner = new HtmlCleaner(cleanerProperties);
+
+        String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html><head /><body><p>test</p></body></html>";
+        TagNode cleaned = theCleaner.clean(expected);
+                
+        Serializer theSerializer = new SimpleXmlSerializer(theCleaner.getProperties());
+        String output = theSerializer.getAsString(cleaned);
+        assertEquals(expected, output);
+    }
+    
+    /**
      * Test for #2901.
      */
 	public void testWhitespaceInHead() throws IOException {
