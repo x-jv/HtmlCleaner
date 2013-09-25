@@ -50,6 +50,25 @@ public class CDATATest {
 
     
     @Test
+    public void CDATAinthewrongplace(){
+    	String testData = ""
+        	+ "<p>"
+        	+ "<![CDATA[\n"
+        	+ "function helloWorld() {\n"
+        	+ "};\n"
+        	+ "]]>\n"
+        	+ "</p>";
+        	
+        	TagNode cleaned = cleaner.clean(testData);
+        	TagNode p = cleaned.findElementByName("p", true);
+        	
+        	//
+        	// We should have no CData nodes
+        	//
+        	assertTrue(p.getAllChildren().size() == 0);
+    }
+    
+    @Test
     public void nonSafeCDATA(){
     	String testData = ""
         	+ "<script type=\"text/javascript\">"
