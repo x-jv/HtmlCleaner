@@ -530,6 +530,19 @@ public class HtmlTokenizer {
                 _isScriptContext = false;
             }
 
+			//
+			// Skip any whitespace after the closing HTML tag rather than move
+			// it.
+			//
+			// If there is any content after the closing HTML tag it will still
+			// be moved, just with any preceding whitespace stripped. This
+			// removes the situation of extra newlines following the end of the
+			// document being moved inside the body (see #67).
+			//
+            if (tagName != null && tagName.equalsIgnoreCase("html")){
+            	skipWhitespaces();
+            }
+            
             _currentTagToken = null;
         } else {
             addSavedAsContent();
