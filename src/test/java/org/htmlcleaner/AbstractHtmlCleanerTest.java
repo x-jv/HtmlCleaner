@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import org.junit.Assert;
 import org.junit.Before;
 
 import static org.junit.Assert.assertEquals;
@@ -75,5 +76,20 @@ public abstract class AbstractHtmlCleanerTest {
 		CharSequence content = Utils.readUrl(file.toURI().toURL(), "UTF-8");
 		return content.toString();
 	}
+	
+	public static final String HEADER =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"; 
+		    //+ "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" "
+            //+ "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n";
+    private static final String HEADER_FULL = HEADER + "<html><head /><body>";
+    private static final String FOOTER = "</body></html>";
+
+    protected void assertHTML(String expected, String input) throws IOException {
+        StringWriter writer = new StringWriter();
+        serializer.write(cleaner.clean(input), writer, "UTF-8");
+    	String actual = writer.toString();
+    	
+        Assert.assertEquals(HEADER_FULL + expected + FOOTER, actual);
+    }
 
 }
