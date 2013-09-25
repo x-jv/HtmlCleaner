@@ -40,10 +40,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.w3c.dom.Document;
 
 public class DocTypesTest {
 	
@@ -57,6 +61,33 @@ public class DocTypesTest {
 		properties.setOmitXmlDeclaration(true);
 		properties.setOmitDoctypeDeclaration(false);
 		serializer = new SimpleHtmlSerializer(properties);
+	}
+	
+    @Test
+    public void DocTypeUsingDom() throws IOException, ParserConfigurationException{
+    	
+        CleanerProperties cleanerProperties = new CleanerProperties();
+        cleanerProperties.setOmitXmlDeclaration(false);
+        cleanerProperties.setOmitDoctypeDeclaration(false);
+        cleanerProperties.setIgnoreQuestAndExclam(false);
+        cleaner = new HtmlCleaner(cleanerProperties);
+        
+        DomSerializer domSerializer = new DomSerializer(cleaner.getProperties());
+		String initial = readFile("src/test/resources/test12.html");
+        TagNode cleaned = cleaner.clean(initial);
+           
+        Document doc = domSerializer.createDOM(cleaned);
+
+        assertEquals("html", doc.getDoctype().getName());
+        assertEquals("-//W3C//DTD XHTML 1.0 Strict//EN", doc.getDoctype().getPublicId());	
+        assertEquals("http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd", doc.getDoctype().getSystemId());	        
+    }
+    
+    // TODO remove and make this class a subclass of AbstractHtmlCleanerTest
+	protected String readFile(String filename) throws IOException {
+		File file = new File(filename);
+		CharSequence content = Utils.readUrl(file.toURI().toURL(), "UTF-8");
+		return content.toString();
 	}
 
 	
