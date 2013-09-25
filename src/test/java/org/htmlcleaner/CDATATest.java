@@ -40,9 +40,16 @@ import java.io.IOException;
 import org.junit.Test;
 
 public class CDATATest extends AbstractHtmlCleanerTest {
-    
+
+	/**
+	 * In this test the script has no CDATA, an unescaped CDATAsection in a
+	 * script tage, and there is also an incorrect CDATA declaration in a
+	 * paragraph tag.
+	 * 
+	 * @throws IOException
+	 */
     @Test
-    public void test() throws IOException{
+    public void CDATAmixed() throws IOException{
 		String initial = readFile("src/test/resources/test11.html");
 		String expected = readFile("src/test/resources/test11_expected.html");
 		assertCleaned(initial, expected);
@@ -62,6 +69,51 @@ public class CDATATest extends AbstractHtmlCleanerTest {
 		String expected = readFile("src/test/resources/test12_expected.html");
 		
 		assertCleaned(initial, expected);
+    }
+    
+    @Test
+    public void scriptAndCData() throws IOException
+    {
+    	
+        CleanerProperties cleanerProperties = new CleanerProperties();
+        cleanerProperties.setOmitXmlDeclaration(false);
+        cleanerProperties.setOmitDoctypeDeclaration(false);
+        cleanerProperties.setIgnoreQuestAndExclam(false);
+        cleanerProperties.setAddNewlineToHeadAndBody(false);
+        this.cleaner = new HtmlCleaner(cleanerProperties);
+        this.serializer = new SimpleXmlSerializer(cleaner.getProperties());
+
+        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/// Comment \nalert(\"Hello World\")\n //\n/*]]>*/</script>", 
+        "<script type=\"text/javascript\">// Comment \nalert(\"Hello World\")\n //\n</script>");
+        
+        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\nalert(\"Hello World\")\n/*]]>*/</script>", 
+        "<script type=\"text/javascript\">//<![CDATA[\nalert(\"Hello World\")\n//]]></script>");
+        
+        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n//\nalert(\"Hello World\")\n// \n/*]]>*/</script>", 
+            "<script type=\"text/javascript\">//<![CDATA[\n//\nalert(\"Hello World\")\n// \n]]></script>");
+
+        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n\n"
+            + "function escapeForXML(origtext) {\n"
+            + "   return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n"
+            + "       .replace(/>/g,'&'+'gt;').replace(/\'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');"
+            + "}\n"
+            + "// \n/*]]>*/"
+            + "</script>", "<script type=\"text/javascript\">\n"
+            + "//<![CDATA[\n"
+            + "function escapeForXML(origtext) {\n"
+            + "   return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n"
+            + "       .replace(/>/g,'&'+'gt;').replace(/\'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');"
+            + "}\n"
+            + "// ]]>\n"
+            + "</script>");
+
+        //assertHTML("<script>//<![CDATA[\n<>\n//]]></script>", "<script>&lt;&gt;</script>");
+        assertHTML("<script>/*<![CDATA[*/<>/*]]>*/</script>", "<script><></script>");
+
+        // Verify that CDATA not inside SCRIPT or STYLE elements are considered comments in HTML and thus stripped
+        // when cleaned.
+        assertHTML("<p/>", "<p><![CDATA[&]]></p>");
+        assertHTML("<p>&amp;&amp;</p>", "<p>&<![CDATA[&]]>&</p>");
     }
     
     /**
@@ -88,10 +140,11 @@ public class CDATATest extends AbstractHtmlCleanerTest {
         	TagNode p = cleaned.findElementByName("p", true);
         	
         	//
-        	// We should have no CData nodes
+        	// We should have no CData nodes, instead the contents should
+        	// be processed as content and escaped as usual
         	//
-        	assertTrue(p.getAllChildren().size() == 0);
-        	assertTrue(p.hasChildren() == false);
+        	assertTrue(p.getAllChildren().get(0) instanceof ContentNode);
+        	System.out.println(serializer.getAsString(testData));
     }
     
     @Test
@@ -141,7 +194,7 @@ public class CDATATest extends AbstractHtmlCleanerTest {
         	String content = cdata.getContentWithoutStartAndEndTokens();
         	assertEquals("\nfunction helloWorld() {\n};\n", content);
         	
-        	String safeContent = cdata.getContent();
+        	String safeContent = cdata.getContentWithStartAndEndTokens();
         	assertEquals("/*<![CDATA[*/\nfunction helloWorld() {\n};\n/*]]>*/", safeContent);
     }
     
@@ -153,12 +206,12 @@ public class CDATATest extends AbstractHtmlCleanerTest {
     public void safeCDATAAlternate(){
     	String testData = ""
         	+ "<script type=\"text/javascript\">\n"
-        	+ "// <![CDATA[\n"
+        	+ "//<![CDATA[\n"
         	+ "function escapeForXML(origtext) {\n"
         	+ " return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n"
         	+ " .replace(/>/g,'&'+'gt;').replace(/\'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');"
         	+ "}\n"
-        	+ "// ]]>\n"
+        	+ "//]]>\n"
         	+ "</script>";
         	
         	TagNode cleaned = cleaner.clean(testData);
@@ -168,8 +221,8 @@ public class CDATATest extends AbstractHtmlCleanerTest {
         	//
         	// We should have a CData node for the CDATA section
         	//
-        	assertTrue(script.getAllChildren().get(0) instanceof CData);
-        	CData cdata = (CData)script.getAllChildren().get(0);
+        	assertTrue(script.getAllChildren().get(1) instanceof CData);
+        	CData cdata = (CData)script.getAllChildren().get(1);
         	
         	String content = cdata.getContentWithoutStartAndEndTokens();
         	assertEquals("\nfunction escapeForXML(origtext) {\n return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n .replace(/>/g,'&'+'gt;').replace(/'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');}\n", content);
@@ -198,8 +251,8 @@ public class CDATATest extends AbstractHtmlCleanerTest {
         	//
         	// We should have a CData node for the CDATA section
         	//
-        	assertTrue(script.getAllChildren().get(0) instanceof CData);
-        	CData cdata = (CData)script.getAllChildren().get(0);
+        	assertTrue(script.getAllChildren().get(1) instanceof CData);
+        	CData cdata = (CData)script.getAllChildren().get(1);
         	
         	String content = cdata.getContentWithoutStartAndEndTokens();
         	assertEquals("\nfunction escapeForXML(origtext) {\n return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n .replace(/>/g,'&'+'gt;').replace(/'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');}\n", content);
@@ -211,8 +264,10 @@ public class CDATATest extends AbstractHtmlCleanerTest {
     	TagNode cleaned = cleaner.clean(testData);
     	TagNode style = cleaned.findElementByName("style", true);
     	
+    	assertTrue(style.getAllChildren().get(0) instanceof CData);    	
+    	
     	String content = (((CData)style.getAllChildren().get(0)).getContentWithoutStartAndEndTokens());
-    	assertTrue(style.getAllChildren().get(0) instanceof CData);
+
     	assertEquals("\n#ampmep_188 { }\n", content);
 
     }

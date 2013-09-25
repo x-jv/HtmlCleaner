@@ -54,12 +54,12 @@ public class DomSerializerTest {
     {
     	String testData = ""
     	+ "<script type=\"text/javascript\">\n"
-    	+ "// <![CDATA[\n"
+    	+ "//<![CDATA[\n"
     	+ "function escapeForXML(origtext) {\n"
     	+ " return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n"
     	+ " .replace(/>/g,'&'+'gt;').replace(/\'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');"
     	+ "}\n"
-    	+ "// ]]>"
+    	+ "//]]>"
     	+ "</script>";
     	
     	TagNode cleaned = cleaner.clean(testData);
@@ -68,13 +68,14 @@ public class DomSerializerTest {
     	Document output = ser.createDOM(cleaned);
     	
     	// We should have a script tag
-    	assertEquals("script", output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getNodeName());
+
+    	assertEquals("script",         output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getNodeName());
 
     	// The content of the script tag should be CDATA
-    	assertEquals("#cdata-section", output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getChildNodes().item(0).getNodeName());
+    	assertEquals("#cdata-section", output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getChildNodes().item(1).getNodeName());
     	
     	// The value of the CDATA section should be as expected from the input
-    	String content = output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getChildNodes().item(0).getNodeValue();
+    	String content = output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getChildNodes().item(1).getNodeValue();
     	assertEquals("\nfunction escapeForXML(origtext) {\n return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n .replace(/>/g,'&'+'gt;').replace(/'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');}\n", content);    	
     }
   
