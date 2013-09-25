@@ -46,10 +46,6 @@ import java.util.*;
 public abstract class XmlSerializer extends Serializer {
 
     public static final String XMLNS_NAMESPACE = "xmlns";
-    public static final String BEGIN_CDATA = "<![CDATA[";
-    public static final String END_CDATA = "]]>";
-    public static final String SAFE_BEGIN_CDATA = "/*" + BEGIN_CDATA + "*/";
-    public static final String SAFE_END_CDATA = "/*" + END_CDATA + "*/";
 
 	protected XmlSerializer(CleanerProperties props) {
 		super(props);
@@ -172,8 +168,8 @@ public abstract class XmlSerializer extends Serializer {
                 // because we are not considering if the file is xhtml or html,
                 // we need to put a javascript comment in front of the CDATA in case this is NOT xhtml
                 writer.write(">");
-                if (!tagNode.getText().toString().startsWith(SAFE_BEGIN_CDATA)) {
-                    writer.write(SAFE_BEGIN_CDATA);
+                if (!tagNode.getText().toString().startsWith(CData.SAFE_BEGIN_CDATA)) {
+                    writer.write(CData.SAFE_BEGIN_CDATA);
                 }
             } else {
                 writer.write(">");
@@ -231,8 +227,8 @@ public abstract class XmlSerializer extends Serializer {
                 // because we are not considering if the file is xhtml or html,
                 // we need to put a javascript comment in front of the CDATA in case this is NOT xhtml
 
-                if (!tagNode.getText().toString().trim().endsWith(SAFE_END_CDATA)) {
-                    writer.write(SAFE_END_CDATA);
+                if (!tagNode.getText().toString().trim().endsWith(CData.SAFE_END_CDATA)) {
+                    writer.write(CData.SAFE_END_CDATA);
                 }
             }
 

@@ -59,8 +59,8 @@ public class SimpleXmlSerializer extends XmlSerializer {
         String content = item.getContent();
         String trimmed = content.trim();
         boolean dontEscape = dontEscape(tagNode);
-        if (trimmed.endsWith(SAFE_END_CDATA)) {
-            int pos = content.lastIndexOf(SAFE_END_CDATA);
+        if (trimmed.endsWith(CData.SAFE_END_CDATA)) {
+            int pos = content.lastIndexOf(CData.SAFE_END_CDATA);
             String ending = content.substring(pos);
             if (dontEscape) {
                 writer.write( content.substring(0, pos).replaceAll("]]>", "]]&gt;") );
@@ -71,8 +71,8 @@ public class SimpleXmlSerializer extends XmlSerializer {
             	// we need to check whether the node contains a CDATA start marker not
             	// just if it starts with one.
             	//
-                if (trimmed.contains(BEGIN_CDATA)) {                	
-                    int actualStart = content.indexOf(BEGIN_CDATA) + BEGIN_CDATA.length();
+                if (trimmed.contains(CData.BEGIN_CDATA)) {                	
+                    int actualStart = content.indexOf(CData.BEGIN_CDATA) + CData.BEGIN_CDATA.length();
                     writer.write(content.substring(0, actualStart));
                     writer.write( escapeXml(content.substring(actualStart, pos)));
                 } else {

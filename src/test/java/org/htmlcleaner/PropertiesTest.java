@@ -35,10 +35,10 @@ public class PropertiesTest extends TestCase {
         properties.setAdvancedXmlEscape(false);
         properties.setUseCdataForScriptAndStyle(true);
         xmlString = getXmlString(cleaner, properties);
-        String expected = "<script>" + XmlSerializer.SAFE_BEGIN_CDATA + "var x=y&&z;" + XmlSerializer.SAFE_END_CDATA
+        String expected = "<script>" + CData.SAFE_BEGIN_CDATA + "var x=y&&z;" + CData.SAFE_END_CDATA
                 + "</script>";
         assertTrue("looking for :\"" + expected + "\" in :\n" + xmlString, xmlString.indexOf(expected) >= 0);
-        expected = "<style>" + XmlSerializer.SAFE_BEGIN_CDATA + ".test{font-size:10;}" + XmlSerializer.SAFE_END_CDATA
+        expected = "<style>" + CData.SAFE_BEGIN_CDATA + ".test{font-size:10;}" + CData.SAFE_END_CDATA
                 + "</style>";
         assertTrue("looking for :\"" + expected + "\" in :\n" + xmlString, xmlString.indexOf(expected) >= 0);
         properties.setUseCdataForScriptAndStyle(false);
@@ -524,14 +524,14 @@ public class PropertiesTest extends TestCase {
                 new String[] {
                         HTML_COMMENT_OUT_BEGIN + "//" + COMMENT_START + "\n" + SAMPLE_JS + "//" + COMMENT_END + "\n"
                                 + HTML_COMMENT_OUT_END,
-                        HTML_COMMENT_OUT_BEGIN + XmlSerializer.SAFE_BEGIN_CDATA + "\n" + SAMPLE_JS
-                                + XmlSerializer.SAFE_END_CDATA + "\n" + HTML_COMMENT_OUT_END },
+                        HTML_COMMENT_OUT_BEGIN + CData.SAFE_BEGIN_CDATA + "\n" + SAMPLE_JS
+                                + CData.SAFE_END_CDATA + "\n" + HTML_COMMENT_OUT_END },
                 // don't let random whitespace confuse things
                 new String[] {
                         HTML_COMMENT_OUT_BEGIN + "\n\n\n\n" + "//" + "   \t" + COMMENT_START + "\n" + SAMPLE_JS
                                 + "\n\n\n" + "//" + COMMENT_END + "\n\n\t\n" + HTML_COMMENT_OUT_END,
-                        HTML_COMMENT_OUT_BEGIN + "\n\n\n\n" + XmlSerializer.SAFE_BEGIN_CDATA + "\n" + SAMPLE_JS
-                                + "\n\n\n" + "//" + XmlSerializer.SAFE_END_CDATA + "\n\n\t\n" + HTML_COMMENT_OUT_END },
+                        HTML_COMMENT_OUT_BEGIN + "\n\n\n\n" + CData.SAFE_BEGIN_CDATA + "\n" + SAMPLE_JS
+                                + "\n\n\n" + "//" + CData.SAFE_END_CDATA + "\n\n\t\n" + HTML_COMMENT_OUT_END },
 
         }) {
             doTestConvertOldStyleComments(cleaner, properties, testData);
@@ -543,8 +543,8 @@ public class PropertiesTest extends TestCase {
         new String[] {
                 HTML_COMMENT_OUT_BEGIN + "//" + "an ordinary comment" + "\n" + SAMPLE_JS + "//" + "a final remark"
                         + HTML_COMMENT_OUT_END,
-                HTML_COMMENT_OUT_BEGIN + XmlSerializer.SAFE_BEGIN_CDATA + "//" + "an ordinary comment" + "\n"
-                        + SAMPLE_JS + "//" + "a final remark" + XmlSerializer.SAFE_END_CDATA + HTML_COMMENT_OUT_END }, }) {
+                HTML_COMMENT_OUT_BEGIN + CData.SAFE_BEGIN_CDATA + "//" + "an ordinary comment" + "\n"
+                        + SAMPLE_JS + "//" + "a final remark" + CData.SAFE_END_CDATA + HTML_COMMENT_OUT_END }, }) {
             doTestConvertOldStyleComments(cleaner, properties, testData);
         }
     }
