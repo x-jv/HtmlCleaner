@@ -35,22 +35,47 @@ package org.htmlcleaner;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.BeforeClass;
+import java.io.IOException;
+
 import org.junit.Test;
 
-public class CDATATest {
-	
-    private static HtmlCleaner cleaner;
-
-    @BeforeClass
-    public static void setUp() throws Exception
-    {
-        cleaner = new HtmlCleaner();
-    }
-
+public class CDATATest extends AbstractHtmlCleanerTest {
     
     @Test
+    public void test() throws IOException{
+		String initial = readFile("src/test/resources/test11.html");
+		String expected = readFile("src/test/resources/test11_expected.html");
+		assertCleaned(initial, expected);
+    }
+    
+    @Test
+    public void CDATAandDocType() throws IOException{
+    	
+        CleanerProperties cleanerProperties = new CleanerProperties();
+        cleanerProperties.setOmitXmlDeclaration(false);
+        cleanerProperties.setOmitDoctypeDeclaration(false);
+        cleanerProperties.setIgnoreQuestAndExclam(false);
+        this.cleaner = new HtmlCleaner(cleanerProperties);
+        this.serializer = new SimpleXmlSerializer(cleaner.getProperties());
+
+		String initial = readFile("src/test/resources/test12.html");
+		String expected = readFile("src/test/resources/test12_expected.html");
+		
+		assertCleaned(initial, expected);
+    }
+    
+    /**
+     * Using the default setup, we should strip out CData outside
+     * of script and style tags.
+     */
+    @Test
     public void CDATAinthewrongplace(){
+    	
+        CleanerProperties cleanerProperties = new CleanerProperties();
+        cleanerProperties.setIgnoreQuestAndExclam(true);
+
+        cleaner = new HtmlCleaner(cleanerProperties);
+    	
     	String testData = ""
         	+ "<p>"
         	+ "<![CDATA[\n"
@@ -66,6 +91,7 @@ public class CDATATest {
         	// We should have no CData nodes
         	//
         	assertTrue(p.getAllChildren().size() == 0);
+        	assertTrue(p.hasChildren() == false);
     }
     
     @Test
