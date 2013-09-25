@@ -38,8 +38,8 @@ public class CData extends ContentNode {
     public static final String END_CDATA = "]]>";
     public static final String SAFE_BEGIN_CDATA = "/*<![CDATA[*/";
     public static final String SAFE_END_CDATA = "/*]]>*/";
-    public static final String SAFE_BEGIN_CDATA_ALT = "// <![CDATA[";
-    public static final String SAFE_END_CDATA_ALT = "// ]]>";
+    public static final String SAFE_BEGIN_CDATA_ALT = "//<![CDATA[";
+    public static final String SAFE_END_CDATA_ALT = "//]]>";
 	
 	public CData(String content){
 		super(content);	
@@ -54,7 +54,7 @@ public class CData extends ContentNode {
 	 */
 	@Override
 	public String getContent() {
-		return getContentWithStartAndEndTokens();
+		return getContentWithoutStartAndEndTokens();
 	}
 
 	/* (non-Javadoc)
@@ -65,7 +65,7 @@ public class CData extends ContentNode {
 		return getContentWithStartAndEndTokens();
 	}
 	
-	private String getContentWithStartAndEndTokens(){
+	public String getContentWithStartAndEndTokens(){
 		return SAFE_BEGIN_CDATA + this.content + SAFE_END_CDATA;
 	}
 	

@@ -75,6 +75,7 @@ public class HtmlTokenizer {
     private boolean _asExpected = true;
 
     private boolean _isScriptContext;
+    private boolean _isStyleContext;
 
     private HtmlCleaner cleaner;
     private CleanerProperties props;
@@ -392,6 +393,8 @@ public class HtmlTokenizer {
             	} else if ( startsWith("</") && isIdentifierStartChar(_pos + 2) ) {
             		_isLateForDoctype = true;
             		tagEnd();
+            	} else if ( startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) { 
+                	cdata();
             	} else if ( startsWith("<!--") ) {
             		comment();
             	} else if ( startsWith("<") && isIdentifierStartChar(_pos + 1) ) {
@@ -468,6 +471,9 @@ public class HtmlTokenizer {
                 if ( "script".equalsIgnoreCase(tagName) ) {
                     _isScriptContext = true;
                 }
+                if ( "style".equalsIgnoreCase(tagName) ) {
+                    _isStyleContext = true;
+                }
             } else if ( startsWith("/>") ) {
             	go(2);
             }
@@ -528,6 +534,10 @@ public class HtmlTokenizer {
 
             if ( "script".equalsIgnoreCase(tagName) ) {
                 _isScriptContext = false;
+            }
+            
+            if ( "style".equalsIgnoreCase(tagName) ) {
+                _isStyleContext = false;
             }
 
 			//
@@ -704,14 +714,14 @@ public class HtmlTokenizer {
     private boolean content() throws IOException {
         while ( !isAllRead() ) {
 
-            if (startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) {
-            	cdata();
-            	break;
-            }
-            
+
             saveCurrent();
             go();
             
+            if (startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) {
+            	break;
+            }
+ 
             if (isTagStartOrEnd()) {
                 break;
             }
@@ -777,7 +787,12 @@ public class HtmlTokenizer {
     }
     
     private void cdata() throws IOException {
-        
+    	
+    	if (!_isScriptContext && !_isStyleContext){
+    		content();
+    		return;
+    	}
+    	
     	if (startsWith(CData.SAFE_BEGIN_CDATA)){
     		go(CData.SAFE_BEGIN_CDATA.length());
     	} else if (startsWith(CData.SAFE_BEGIN_CDATA_ALT)){

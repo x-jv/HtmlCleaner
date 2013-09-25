@@ -52,13 +52,18 @@ public class SimpleXmlSerializer extends XmlSerializer {
 	}
 
 	protected void serializeCData(CData item, TagNode tagNode, Writer writer) throws IOException{
-			writer.write(item.getContent());
+		if (dontEscape(tagNode)){
+			writer.write(item.getContentWithoutStartAndEndTokens());
+		} else {
+			writer.write(item.getContentWithStartAndEndTokens());
+		}
 	}
 	
 	protected void serializeContentToken(ContentNode item, TagNode tagNode, Writer writer) throws IOException {
         String content = item.getContent();
         String trimmed = content.trim();
         boolean dontEscape = dontEscape(tagNode);
+        
         if (trimmed.endsWith(CData.SAFE_END_CDATA)) {
             int pos = content.lastIndexOf(CData.SAFE_END_CDATA);
             String ending = content.substring(pos);
@@ -81,9 +86,15 @@ public class SimpleXmlSerializer extends XmlSerializer {
             }
             writer.write(ending);
         } else {
-            if (dontEscape)
-                writer.write( content.replaceAll("]]>", "]]&gt;") );
-            else {
+            if (dontEscape){            	
+            	//
+            	// Why would we use escaped version???
+            	//
+            	//content = content.replaceAll("]]>", "]]&gt;");
+            	//content = content.replaceAll("<!\\[CDATA\\[", "&lt;![CDATA[");
+            	writer.write(content);
+            	
+            }else {
                 writer.write( escapeXml(content) );
             }
         }       
@@ -92,12 +103,13 @@ public class SimpleXmlSerializer extends XmlSerializer {
     @Override
     protected void serialize(TagNode tagNode, Writer writer) throws IOException {
         serializeOpenTag(tagNode, writer, false);
-
+        
         List tagChildren = tagNode.getAllChildren();
         if ( !isMinimizedTagSyntax(tagNode) ) {
             Iterator childrenIt = tagChildren.iterator();
             while ( childrenIt.hasNext() ) {
                 Object item = childrenIt.next();
+                   	
                 if (item != null) {
                 	if (item instanceof CData) {
                 		serializeCData((CData)item, tagNode, writer);
