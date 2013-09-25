@@ -22,8 +22,10 @@ public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
  
     	HtmlCleaner theCleaner = new HtmlCleaner(cleanerProperties);
 
+        String initial = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html><head /><body><p>test</p></body></html>\n";
         String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html><head /><body><p>test</p></body></html>";
-        TagNode cleaned = theCleaner.clean(expected);
+
+        TagNode cleaned = theCleaner.clean(initial);
                 
         Serializer theSerializer = new SimpleXmlSerializer(theCleaner.getProperties());
         String output = theSerializer.getAsString(cleaned);
