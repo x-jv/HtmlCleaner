@@ -42,6 +42,17 @@ import org.junit.Test;
 public class CDATATest extends AbstractHtmlCleanerTest {
 
 	/**
+	 * Tests that we escape CDATA in regular HTML content
+	 * @throws IOException
+	 */
+	@Test
+	public void NotReallyCData() throws IOException{
+		String initial = "<p><![CDATA ]]> is sometimes used in XML";
+		String expected = "<html>\n<head />\n<body><p>&lt;![CDATA ]]&gt; is sometimes used in XML</p></body></html>";
+		assertCleaned(initial, expected);
+	}
+	
+	/**
 	 * This is a simple no-op test; when we use a HTML serializer we don't
 	 * automatically wrap the contents of script tags in a CDATA, as we do with
 	 * the XML serializers
