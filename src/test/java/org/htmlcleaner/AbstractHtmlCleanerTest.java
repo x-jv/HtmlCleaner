@@ -48,7 +48,7 @@ import static org.junit.Assert.assertEquals;
 public abstract class AbstractHtmlCleanerTest {
 	
 	protected HtmlCleaner cleaner;
-	protected XmlSerializer serializer;
+	protected Serializer serializer;
 	
 	@Before
 	public void setup(){
