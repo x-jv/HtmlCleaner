@@ -42,6 +42,28 @@ import org.junit.Test;
 public class CDATATest extends AbstractHtmlCleanerTest {
 
 	/**
+	 * This is a simple no-op test; when we use a HTML serializer we don't
+	 * automatically wrap the contents of script tags in a CDATA, as we do with
+	 * the XML serializers
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void NoCData() throws IOException{
+		CleanerProperties cleanerProperties = new CleanerProperties();
+        cleanerProperties.setOmitXmlDeclaration(true);
+        cleanerProperties.setOmitDoctypeDeclaration(true);
+        cleanerProperties.setIgnoreQuestAndExclam(false);
+        cleanerProperties.setUseCdataForScriptAndStyle(true);
+        this.cleaner = new HtmlCleaner(cleanerProperties);
+        this.serializer = new SimpleHtmlSerializer(cleaner.getProperties());
+        
+		String initial = "<html><head><script>function testNoOp(){<>}</script></head><body></body></html>";
+		String expected = initial;
+		assertCleaned(initial, expected);
+	}
+	
+	/**
 	 * In this test the script has no CDATA, an unescaped CDATAsection in a
 	 * script tag, and there is also an incorrect CDATA declaration in a
 	 * paragraph tag.
