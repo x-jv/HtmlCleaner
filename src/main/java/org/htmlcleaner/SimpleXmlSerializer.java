@@ -51,55 +51,6 @@ public class SimpleXmlSerializer extends XmlSerializer {
 		super(props);
 	}
 
-	protected void serializeCData(CData item, TagNode tagNode, Writer writer) throws IOException{
-		if (dontEscape(tagNode)){
-			writer.write(item.getContentWithoutStartAndEndTokens());
-		} else {
-			writer.write(item.getContentWithStartAndEndTokens());
-		}
-	}
-	
-	protected void serializeContentToken(ContentNode item, TagNode tagNode, Writer writer) throws IOException {
-        String content = item.getContent();
-        String trimmed = content.trim();
-        boolean dontEscape = dontEscape(tagNode);
-        
-        if (trimmed.endsWith(CData.SAFE_END_CDATA)) {
-            int pos = content.lastIndexOf(CData.SAFE_END_CDATA);
-            String ending = content.substring(pos);
-            if (dontEscape) {
-                writer.write( content.substring(0, pos).replaceAll("]]>", "]]&gt;") );
-            } else {
-            	//
-            	// we used create a new content node whenever encountering a CDATA start
-            	// however we can also find a CDATA start *within* a content node so
-            	// we need to check whether the node contains a CDATA start marker not
-            	// just if it starts with one.
-            	//
-                if (trimmed.contains(CData.BEGIN_CDATA)) {                	
-                    int actualStart = content.indexOf(CData.BEGIN_CDATA) + CData.BEGIN_CDATA.length();
-                    writer.write(content.substring(0, actualStart));
-                    writer.write( escapeXml(content.substring(actualStart, pos)));
-                } else {
-                    writer.write( escapeXml(content.substring(0, pos)));
-                }
-            }
-            writer.write(ending);
-        } else {
-            if (dontEscape){            	
-            	//
-            	// Why would we use escaped version???
-            	//
-            	//content = content.replaceAll("]]>", "]]&gt;");
-            	//content = content.replaceAll("<!\\[CDATA\\[", "&lt;![CDATA[");
-            	writer.write(content);
-            	
-            }else {
-                writer.write( escapeXml(content) );
-            }
-        }       
-    }
-
     @Override
     protected void serialize(TagNode tagNode, Writer writer) throws IOException {
         serializeOpenTag(tagNode, writer, false);

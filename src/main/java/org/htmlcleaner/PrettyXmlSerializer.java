@@ -157,6 +157,8 @@ public class PrettyXmlSerializer extends XmlSerializer {
                 for (Object child: tagChildren) {
                     if (child instanceof TagNode) {
                         serializePrettyXml( (TagNode)child, writer, isHeadlessNode ? level : level + 1 );
+                    } else if (child instanceof CData){
+                    	serializeCData((CData)child, tagNode, writer);
                     } else if (child instanceof ContentNode) {
                         String content = dontEscape ? child.toString().replaceAll("]]>", "]]&gt;") : escapeXml(child.toString());
                         writer.write( getIndentedText(content, isHeadlessNode ? level : level + 1) );

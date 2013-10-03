@@ -139,6 +139,40 @@ public abstract class XmlSerializer extends Serializer {
     protected void serializeOpenTag(TagNode tagNode, Writer writer) throws IOException {
         serializeOpenTag(tagNode, writer, true);
     }
+    
+	/**
+	 * Serialize a CDATA section. If the context is a script or style tag, and
+	 * using CDATA for script and style is set to true, then we just write the
+	 * actual content, as the whole section is wrapped in CDATA tokens.
+	 * Otherwise we escape the content as if it were regular text.
+	 * 
+	 * @param item the CDATA instance
+	 * @param tagNode the TagNode within which the CDATA appears
+	 * @param writer the writer to output to
+	 * @throws IOException
+	 */
+	protected void serializeCData(CData item, TagNode tagNode, Writer writer) throws IOException{
+		if (dontEscape(tagNode)){
+			writer.write(item.getContentWithoutStartAndEndTokens());
+		} else {
+			writer.write(escapeXml(item.getContentWithStartAndEndTokens()));
+		}
+	}
+	
+	/**
+	 * Serialize a content token, escaping where necessary.
+	 * @param item the content token to serialize
+	 * @param tagNode the TagNode within which the content token appears
+	 * @param writer the writer to output to
+	 * @throws IOException
+	 */
+	protected void serializeContentToken(ContentNode item, TagNode tagNode, Writer writer) throws IOException {
+		if (dontEscape(tagNode)){            	
+			writer.write(item.getContent());
+		}else {
+			writer.write( escapeXml(item.getContent()) );
+		}     
+	}
 
     protected void serializeOpenTag(TagNode tagNode, Writer writer, boolean newLine) throws IOException {
         if ( !isForbiddenTag(tagNode)) {
