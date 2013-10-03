@@ -789,8 +789,13 @@ public class HtmlTokenizer {
     private void cdata() throws IOException {
     	
     	if (!_isScriptContext && !_isStyleContext){
-    		content();
-    		return;
+    		//
+    		// if we're not set to omit invalid CDATA, then we turn it into a regular ContentNode
+    		//
+    		if (!props.isOmitCdataOutsideScriptAndStyle()){
+    			content();
+    			return;
+    		}
     	}
     	
     	if (startsWith(CData.SAFE_BEGIN_CDATA)){
@@ -820,8 +825,15 @@ public class HtmlTokenizer {
         }
 
         if (_saved.length() > 0) {
-        		String cdata = _saved.toString().substring(cdataStart);
-        		addToken( new CData(cdata) );
+        	//
+        	// If we're not including CDATA outside of script and style tags, we don't
+        	// add a token.
+        	//
+        	if (_isScriptContext || _isStyleContext || !props.isOmitCdataOutsideScriptAndStyle()){
+            		String cdata = _saved.toString().substring(cdataStart);
+            		addToken( new CData(cdata) );
+        	}
+
         }
         _saved.delete(cdataStart, _saved.length());
 

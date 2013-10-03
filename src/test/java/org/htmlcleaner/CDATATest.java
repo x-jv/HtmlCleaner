@@ -43,7 +43,7 @@ public class CDATATest extends AbstractHtmlCleanerTest {
 
 	/**
 	 * In this test the script has no CDATA, an unescaped CDATAsection in a
-	 * script tage, and there is also an incorrect CDATA declaration in a
+	 * script tag, and there is also an incorrect CDATA declaration in a
 	 * paragraph tag.
 	 * 
 	 * @throws IOException
@@ -110,9 +110,20 @@ public class CDATATest extends AbstractHtmlCleanerTest {
         //assertHTML("<script>//<![CDATA[\n<>\n//]]></script>", "<script>&lt;&gt;</script>");
         assertHTML("<script>/*<![CDATA[*/<>/*]]>*/</script>", "<script><></script>");
 
+
+    }
+    
+    @Test
+    public void removeCDATA() throws IOException{
+        CleanerProperties cleanerProperties = new CleanerProperties();
+        cleanerProperties.setOmitCdataOutsideScriptAndStyle(true);
+        cleanerProperties.setAddNewlineToHeadAndBody(false);
+        cleaner = new HtmlCleaner(cleanerProperties);
+        serializer = new SimpleXmlSerializer(cleaner.getProperties());
+        
         // Verify that CDATA not inside SCRIPT or STYLE elements are considered comments in HTML and thus stripped
         // when cleaned.
-        assertHTML("<p/>", "<p><![CDATA[&]]></p>");
+        assertHTML("<p></p>", "<p><![CDATA[&]]></p>");
         assertHTML("<p>&amp;&amp;</p>", "<p>&<![CDATA[&]]>&</p>");
     }
     
@@ -144,7 +155,6 @@ public class CDATATest extends AbstractHtmlCleanerTest {
         	// be processed as content and escaped as usual
         	//
         	assertTrue(p.getAllChildren().get(0) instanceof ContentNode);
-        	System.out.println(serializer.getAsString(testData));
     }
     
     @Test

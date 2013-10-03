@@ -82,6 +82,7 @@ public class CleanerProperties implements HtmlModificationListener{
     private boolean allowHtmlInsideAttributes;
     private boolean namespacesAware;
     private boolean transSpecialEntitiesToNCR;
+    private boolean omitCdataOutsideScriptAndStyle;
 
     /**
      * "cause the cleaner cannot keep track of whitespace at that level",
@@ -318,6 +319,13 @@ public class CleanerProperties implements HtmlModificationListener{
     public String getPruneTags() {
         return pruneTags;
     }
+    
+    public boolean isOmitCdataOutsideScriptAndStyle(){
+    	return omitCdataOutsideScriptAndStyle;
+    }
+    public void setOmitCdataOutsideScriptAndStyle(boolean value){
+    	omitCdataOutsideScriptAndStyle = value;
+    }
 
     /**
      * Resets prune tags set and adds tag name conditions to it.
@@ -468,6 +476,7 @@ public class CleanerProperties implements HtmlModificationListener{
         resetPruneTagSet();
         tagInfoProvider = DefaultTagProvider.INSTANCE;
         htmlModificationListeners = new ArrayList < HtmlModificationListener >();
+        omitCdataOutsideScriptAndStyle = false;
     }
 
     private void resetPruneTagSet() {
