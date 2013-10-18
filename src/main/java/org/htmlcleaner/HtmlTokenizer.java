@@ -476,6 +476,11 @@ public class HtmlTokenizer {
                 }
             } else if ( startsWith("/>") ) {
             	go(2);
+            	//
+            	// If the tag is self-closing, add an end tag token here to avoid
+            	// encapsulating the following content. See issue #93.
+            	//
+            	addToken(new EndTagToken(tagName));
             }
 
             _currentTagToken = null;
