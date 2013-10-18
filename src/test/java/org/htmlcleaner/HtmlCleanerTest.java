@@ -7,6 +7,30 @@ import java.io.IOException;
 import org.junit.Test;
 
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
+	
+	/**
+	 * This is to test issue #93
+	 */
+	@Test
+	public void closingDiv(){
+		//
+		// Check that when a tag is self-closing, we close it and start again rather than
+		// let it remain open and enclose the following tags
+		//
+		String initial = "<div id=\"y\"/><div id=\"z\">something</div>";
+		String expected = "<html>\n<head />\n<body><div id=\"y\"></div><div id=\"z\">something</div></body></html>";
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);
+        
+        //
+        // This should also result in the same output
+        //
+        initial = "<div id=\"y\"></div><div id=\"z\">something</div>";
+        cleaned = cleaner.clean(initial);
+        output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);
+	}
 
 
     /**
