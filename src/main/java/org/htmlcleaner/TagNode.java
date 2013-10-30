@@ -58,7 +58,7 @@ import org.htmlcleaner.conditional.TagNodeNameCondition;
 public class TagNode extends TagToken implements HtmlNode {
     private TagNode parent;
     private Map<String, String> attributes = new LinkedHashMap<String, String>();
-    private List children = new ArrayList();
+    private final List children = new ArrayList();
     private DoctypeToken docType;
     private List itemsToMove;
     private Map<String, String> nsDeclarations;
@@ -157,7 +157,8 @@ public class TagNode extends TagToken implements HtmlNode {
     }
 
     void setChildren(List children) {
-        this.children = children;
+    	this.children.clear();
+        this.children.addAll(children);
     }
 
     public List getAllChildren() {
