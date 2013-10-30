@@ -32,7 +32,7 @@
 */
 package org.htmlcleaner;
 
-public class CData extends ContentNode {
+public class CData extends ContentNode implements HtmlNode {
 	
     public static final String BEGIN_CDATA = "<![CDATA[";
     public static final String END_CDATA = "]]>";

@@ -43,7 +43,7 @@ import java.io.Writer;
 /**
  * <p>HTML doctype token.</p>
  */
-public class DoctypeToken extends BaseTokenImpl {
+public class DoctypeToken extends BaseTokenImpl implements HtmlNode{
 
 	//
 	// Part 1 is the document type, typically 'html' or 'HTML'
