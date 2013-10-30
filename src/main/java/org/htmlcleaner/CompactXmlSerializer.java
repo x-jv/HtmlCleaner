@@ -54,9 +54,9 @@ public class CompactXmlSerializer extends XmlSerializer {
     protected void serialize(TagNode tagNode, Writer writer) throws IOException {
         serializeOpenTag(tagNode, writer, false);
 
-        List tagChildren = tagNode.getAllChildren();
+        List<? extends BaseToken> tagChildren = tagNode.getAllChildren();
         if ( !isMinimizedTagSyntax(tagNode) ) {
-            ListIterator childrenIt = tagChildren.listIterator();
+            ListIterator<? extends BaseToken> childrenIt = tagChildren.listIterator();
             while ( childrenIt.hasNext() ) {
                 Object item = childrenIt.next();
                 if (item != null) {

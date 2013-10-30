@@ -177,7 +177,7 @@ public abstract class XmlSerializer extends Serializer {
     protected void serializeOpenTag(TagNode tagNode, Writer writer, boolean newLine) throws IOException {
         if ( !isForbiddenTag(tagNode)) {
             String tagName = tagNode.getName();
-            Map tagAtttributes = tagNode.getAttributes();
+            Map<String, String> tagAtttributes = tagNode.getAttributes();
 
             // always have head and body in newline
             if (props.isAddNewlineToHeadAndBody() && isHeadOrBody(tagName)) {
@@ -185,9 +185,9 @@ public abstract class XmlSerializer extends Serializer {
             }
 
             writer.write("<" + tagName);
-            Iterator it = tagAtttributes.entrySet().iterator();
+            Iterator<Map.Entry<String, String>> it = tagAtttributes.entrySet().iterator();
             while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
+                Map.Entry<String, String> entry = (Map.Entry<String,String>) it.next();
                 String attName = (String) entry.getKey();
                 String attValue = (String) entry.getValue();
                 serializeAttribute(tagNode, writer, attName, attValue);

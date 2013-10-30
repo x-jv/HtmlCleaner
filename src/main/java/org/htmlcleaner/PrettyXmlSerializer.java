@@ -98,9 +98,9 @@ public class PrettyXmlSerializer extends XmlSerializer {
         return result.toString();
     }
 
-    private String getSingleLineOfChildren(List children) {
+    private String getSingleLineOfChildren(List<? extends BaseToken> children) {
         StringBuilder result = new StringBuilder();
-        Iterator childrenIt = children.iterator();
+        Iterator<? extends BaseToken> childrenIt = children.iterator();
         boolean isFirst = true;
 
         while (childrenIt.hasNext()) {
@@ -134,7 +134,7 @@ public class PrettyXmlSerializer extends XmlSerializer {
     }
 
     protected void serializePrettyXml(TagNode tagNode, Writer writer, int level) throws IOException {
-        List tagChildren = tagNode.getAllChildren();
+        List<? extends BaseToken> tagChildren = tagNode.getAllChildren();
         boolean isHeadlessNode = Utils.isEmptyString(tagNode.getName());
         String indent = isHeadlessNode ? "" : getIndent(level);
 

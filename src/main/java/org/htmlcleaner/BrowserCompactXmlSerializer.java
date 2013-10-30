@@ -67,9 +67,9 @@ public class BrowserCompactXmlSerializer extends XmlSerializer {
         serializeOpenTag(tagNode, writer, false);
         TagInfo tagInfo = props.getTagInfoProvider().getTagInfo(tagNode.getName());
         String tagName = tagInfo!=null? tagInfo.getName() : null;
-        List tagChildren = new ArrayList (tagNode.getAllChildren());
+        List<? extends BaseToken> tagChildren = new ArrayList<BaseToken>(tagNode.getAllChildren());
         if (!isMinimizedTagSyntax(tagNode)) {
-            ListIterator childrenIt = tagChildren.listIterator();
+            ListIterator<? extends BaseToken> childrenIt = tagChildren.listIterator();
             while (childrenIt.hasNext()) {
                 Object item = childrenIt.next();
                 if (item != null) {

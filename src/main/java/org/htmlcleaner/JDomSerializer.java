@@ -130,9 +130,9 @@ public class JDomSerializer {
         }
     }
 
-    private void createSubnodes(Element element, List tagChildren) {
+    private void createSubnodes(Element element, List<? extends BaseToken> tagChildren) {
         if (tagChildren != null) {
-            Iterator it = tagChildren.iterator();
+            Iterator<? extends BaseToken> it = tagChildren.iterator();
             while (it.hasNext()) {
                 Object item = it.next();
                 if (item instanceof CommentNode) {

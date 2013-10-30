@@ -59,9 +59,9 @@ public class CompactHtmlSerializer extends HtmlSerializer {
 
         serializeOpenTag(tagNode, writer, false);
 
-        List tagChildren = tagNode.getChildren();
+        List<? extends BaseToken> tagChildren = tagNode.getAllChildren();
         if ( !isMinimizedTagSyntax(tagNode) ) {
-            ListIterator childrenIt = tagChildren.listIterator();
+            ListIterator<? extends BaseToken> childrenIt = tagChildren.listIterator();
             while ( childrenIt.hasNext() ) {
                 Object item = childrenIt.next();
                 if (item instanceof ContentNode) {

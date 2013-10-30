@@ -96,9 +96,9 @@ public class PrettyHtmlSerializer extends HtmlSerializer {
         return result.toString();
     }
 
-    private String getSingleLineOfChildren(List children) {
+    private String getSingleLineOfChildren(List<? extends BaseToken> children) {
         StringBuilder result = new StringBuilder();
-        Iterator childrenIt = children.iterator();
+        Iterator<? extends BaseToken> childrenIt = children.iterator();
         boolean isFirst = true;
 
         while (childrenIt.hasNext()) {
@@ -132,7 +132,7 @@ public class PrettyHtmlSerializer extends HtmlSerializer {
     }
 
     protected void serializePrettyHtml(TagNode tagNode, Writer writer, int level, boolean isPreserveWhitespaces, boolean isLastNewLine) throws IOException {
-        List tagChildren = tagNode.getChildren();
+        List<? extends BaseToken> tagChildren = tagNode.getAllChildren();
         String tagName = tagNode.getName();
         boolean isHeadlessNode = Utils.isEmptyString(tagName);
         String indent = isHeadlessNode ? "" : getIndent(level);
@@ -155,7 +155,7 @@ public class PrettyHtmlSerializer extends HtmlSerializer {
             if (!preserveWhitespaces && singleLine != null) {
                 writer.write( !dontEscape(tagNode) ? escapeText(singleLine) : singleLine );
             } else {
-                Iterator childIterator = tagChildren.iterator();
+                Iterator<? extends BaseToken> childIterator = tagChildren.iterator();
                 while (childIterator.hasNext()) {
                     Object child = childIterator.next();
                     if (child instanceof TagNode) {

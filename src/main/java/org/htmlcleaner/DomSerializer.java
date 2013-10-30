@@ -140,7 +140,7 @@ public class DomSerializer {
      * @param element the W3C element to which we'll add the subnodes to
      * @param tagChildren the HTML Cleaner nodes to serialize for that node
      */
-    private void createSubnodes(Document document, Element element, List tagChildren) {
+    private void createSubnodes(Document document, Element element, List<? extends BaseToken> tagChildren) {
     	
     	if (tagChildren != null) {
             for(Object item : tagChildren) {
@@ -167,10 +167,10 @@ public class DomSerializer {
                 } else if (item instanceof TagNode) {
                     TagNode subTagNode = (TagNode) item;
                     Element subelement = document.createElement( subTagNode.getName() );
-                    Map attributes =  subTagNode.getAttributes();
-                    Iterator entryIterator = attributes.entrySet().iterator();
+                    Map<String, String> attributes =  subTagNode.getAttributes();
+                    Iterator<Map.Entry<String, String>> entryIterator = attributes.entrySet().iterator();
                     while (entryIterator.hasNext()) {
-                        Map.Entry entry = (Map.Entry) entryIterator.next();
+                        Map.Entry<String, String> entry = (Map.Entry<String, String>) entryIterator.next();
                         String attrName = (String) entry.getKey();
                         String attrValue = (String) entry.getValue();
                         if (escapeXml) {
@@ -184,7 +184,7 @@ public class DomSerializer {
 
                     element.appendChild(subelement);
                 } else if (item instanceof List) {
-                    List sublist = (List) item;
+                    List<? extends BaseToken> sublist = (List<? extends BaseToken>) item;
                     createSubnodes(document, element, sublist);
                 }
             }
