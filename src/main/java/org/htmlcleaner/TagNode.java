@@ -338,16 +338,15 @@ public class TagNode extends TagToken implements HtmlNode {
         }
         return null;
     }
-
+    
     /**
      * Get all elements in the tree that satisfy specified condition.
-     *
      * @param condition
      * @param isRecursive
-     * @return List of TagNode instances with specified name.
+     * @return List of TagNode instances.
      */
-    public List getElementList(ITagNodeCondition condition, boolean isRecursive) {
-        List result = new LinkedList();
+    private List<TagNode> findMatchingTagNodes(ITagNodeCondition condition, boolean isRecursive){
+        List<TagNode> result = new LinkedList<TagNode>();
         if (condition == null) {
             return result;
         }
@@ -359,7 +358,7 @@ public class TagNode extends TagToken implements HtmlNode {
                     result.add(currNode);
                 }
                 if (isRecursive) {
-                    List innerList = currNode.getElementList(condition, isRecursive);
+                    List<TagNode> innerList = currNode.findMatchingTagNodes(condition, isRecursive);
                     if (innerList != null && innerList.size() > 0) {
                         result.addAll(innerList);
                     }
@@ -367,7 +366,18 @@ public class TagNode extends TagToken implements HtmlNode {
             }
         }
 
-        return result;
+        return result;	
+    }
+
+    /**
+     * Get all elements in the tree that satisfy specified condition.
+     *
+     * @param condition
+     * @param isRecursive
+     * @return List of TagNode instances with specified name.
+     */
+    public List<? extends TagNode> getElementList(ITagNodeCondition condition, boolean isRecursive) {
+        return findMatchingTagNodes(condition, isRecursive);
     }
 
     /**
@@ -386,7 +396,7 @@ public class TagNode extends TagToken implements HtmlNode {
         return array;
     }
 
-    public List getAllElementsList(boolean isRecursive) {
+    public List<? extends TagNode> getAllElementsList(boolean isRecursive) {
         return getElementList(new TagAllCondition(), isRecursive);
     }
 
@@ -398,7 +408,7 @@ public class TagNode extends TagToken implements HtmlNode {
         return findElement(new TagNodeNameCondition(findName), isRecursive);
     }
 
-    public List getElementListByName(String findName, boolean isRecursive) {
+    public List<? extends TagNode> getElementListByName(String findName, boolean isRecursive) {
         return getElementList(new TagNodeNameCondition(findName), isRecursive);
     }
 
@@ -410,7 +420,7 @@ public class TagNode extends TagToken implements HtmlNode {
         return findElement(new TagNodeAttExistsCondition(attName), isRecursive);
     }
 
-    public List getElementListHavingAttribute(String attName, boolean isRecursive) {
+    public List<? extends TagNode> getElementListHavingAttribute(String attName, boolean isRecursive) {
         return getElementList(new TagNodeAttExistsCondition(attName), isRecursive);
     }
 
@@ -422,7 +432,7 @@ public class TagNode extends TagToken implements HtmlNode {
         return findElement(new TagNodeAttValueCondition(attName, attValue, isCaseSensitive), isRecursive);
     }
 
-    public List getElementListByAttValue(String attName, String attValue, boolean isRecursive, boolean isCaseSensitive) {
+    public List<? extends TagNode> getElementListByAttValue(String attName, String attValue, boolean isRecursive, boolean isCaseSensitive) {
         return getElementList(new TagNodeAttValueCondition(attName, attValue, isCaseSensitive), isRecursive);
     }
 
