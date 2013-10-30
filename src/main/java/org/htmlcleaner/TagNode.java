@@ -58,9 +58,9 @@ import org.htmlcleaner.conditional.TagNodeNameCondition;
 public class TagNode extends TagToken implements HtmlNode {
     private TagNode parent;
     private Map<String, String> attributes = new LinkedHashMap<String, String>();
-    private final List children = new ArrayList();
+    private final List<BaseToken> children = new ArrayList<BaseToken>();
     private DoctypeToken docType;
-    private List itemsToMove;
+    private List<BaseToken> itemsToMove;
     private Map<String, String> nsDeclarations;
 
     private transient boolean isFormed;
@@ -156,12 +156,12 @@ public class TagNode extends TagToken implements HtmlNode {
         return getChildTagList();
     }
 
-    void setChildren(List children) {
+    public void setChildren(List<? extends BaseToken> children) {
     	this.children.clear();
         this.children.addAll(children);
     }
 
-    public List getAllChildren() {
+    public List<? extends BaseToken> getAllChildren() {
         return children;
     }
 
@@ -190,7 +190,7 @@ public class TagNode extends TagToken implements HtmlNode {
      * @return An array of child TagNode instances.
      */
     public TagNode[] getChildTags() {
-        List childTagList = getChildTagList();
+        List<TagNode> childTagList = getChildTagList();
         TagNode childrenArray[] = new TagNode[childTagList.size()];
         for (int i = 0; i < childTagList.size(); i++) {
             childrenArray[i] = (TagNode) childTagList.get(i);
@@ -291,12 +291,14 @@ public class TagNode extends TagToken implements HtmlNode {
             addChildren((List) child);
         } else if (child instanceof ProxyTagNode) {
             children.add(((ProxyTagNode) child).getToken());
-        } else {
-            children.add(child);
+        } else if (child instanceof BaseToken){
+            children.add((BaseToken)child);
             if (child instanceof TagNode) {
                 TagNode childTagNode = (TagNode) child;
                 childTagNode.parent = this;
             }
+        } else {
+        	throw new RuntimeException("Attempted to add invalid child object to TagNode; class="+child.getClass());
         }
     }
 
@@ -305,7 +307,7 @@ public class TagNode extends TagToken implements HtmlNode {
      *
      * @param newChildren
      */
-    public void addChildren(List newChildren) {
+    public void addChildren(List<? extends BaseToken> newChildren) {
         if (newChildren != null) {
             for (Object child: newChildren) {
                 addChild(child);
@@ -386,7 +388,7 @@ public class TagNode extends TagToken implements HtmlNode {
      * @return The array of all subelements that satisfy specified condition.
      */
     private TagNode[] getElements(ITagNodeCondition condition, boolean isRecursive) {
-        final List list = getElementList(condition, isRecursive);
+        final List<TagNode> list = findMatchingTagNodes(condition, isRecursive);
         TagNode array[];
         if (list == null) {
             array = new TagNode[0];
@@ -496,17 +498,21 @@ public class TagNode extends TagToken implements HtmlNode {
 
     void addItemForMoving(Object item) {
         if (itemsToMove == null) {
-            itemsToMove = new ArrayList();
+            itemsToMove = new ArrayList<BaseToken>();
+        }
+        if (item instanceof BaseToken){
+            itemsToMove.add((BaseToken)item);        	
+        } else {
+        	throw new RuntimeException("Attempt to add invalid item for moving; class="+item.getClass());
         }
 
-        itemsToMove.add(item);
     }
 
-    List getItemsToMove() {
+    List<? extends BaseToken> getItemsToMove() {
         return itemsToMove;
     }
 
-    void setItemsToMove(List itemsToMove) {
+    void setItemsToMove(List<BaseToken> itemsToMove) {
         this.itemsToMove = itemsToMove;
     }
 
