@@ -38,7 +38,7 @@ class ProxyTagNode extends TagNode {
 		return true;
 	}	
 	
-	public Object getToken() {
+	public BaseToken getToken() {
 		return token!=null ? token : comment;
 	}	
 	
