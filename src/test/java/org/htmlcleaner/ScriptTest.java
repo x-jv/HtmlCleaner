@@ -14,7 +14,7 @@ import org.junit.Test;
  * @author scottw
  *
  */
-public class ScriptTest {
+public class ScriptTest extends AbstractHtmlCleanerTest {
 	
 	@Test
 	public void getScripts() throws IOException{
@@ -36,5 +36,30 @@ public class ScriptTest {
 		assertEquals("z.js", scripts.get(2).getAttributeByName("src"));
 
 	}
-
+	
+	@Test
+	public void scriptAttribute() throws IOException{
+		cleaner.getProperties().setUseCdataForScriptAndStyle(true);
+		String initial = "<button onclick='aaa(\"bbb\")'>Click here!</button>";
+		String expected ="<html>\n<head />\n<body><button onclick=\"aaa(&quot;bbb&quot;)\">Click here!</button></body></html>";
+		assertCleaned(initial, expected);
+	}
+	
+	/*
+	 * Test for issue #88 - thanks to Serge Dyomin
+	 */
+	@Test
+	public void scriptAttributeQuotes() throws IOException{
+		 HtmlCleaner thecleaner=new HtmlCleaner();
+         CleanerProperties props = thecleaner.getProperties();
+         props.setOmitXmlDeclaration(true);
+         props.setOmitComments(false);  
+         props.setTranslateSpecialEntities(true);  
+         
+        String initial = readFile("src/test/resources/test16.html");
+        String expected = readFile("src/test/resources/test16_expected.html"); 
+        String output = new SimpleHtmlSerializer(thecleaner.getProperties()).getAsString(thecleaner.clean(initial));
+        
+        assertEquals(expected,output);
+	}
 }
