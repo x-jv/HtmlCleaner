@@ -155,7 +155,7 @@ public abstract class HtmlSerializer extends Serializer {
                         }
                     }
                 } else if (isReservedXmlChar(ch)) {
-                    result.append( props.isTransResCharsToNCR() ? "&#" + (int)ch + ";" : ch );
+                    result.append( props.isTransResCharsToNCR() ? "&#" + (int)ch + ";" : RESERVED_XML_CHARS.get(ch) );
                 } else {
                     result.append(ch);
                 }
