@@ -79,18 +79,18 @@ public class BrowserCompactXmlSerializer extends XmlSerializer {
                         content = content.replaceAll("^"+SpecialEntities.NON_BREAKABLE_SPACE+"+", " ");
                         content = content.replaceAll(SpecialEntities.NON_BREAKABLE_SPACE+"+$", " ");
                         boolean whitespaceAllowed = tagInfo != null && tagInfo.getDisplay().isLeadingAndEndWhitespacesAllowed();
-                        boolean writeLeadingSpace = content.length() > 0 && (Character.isWhitespace(content.charAt(0))) && whitespaceAllowed;
-                        boolean writeEndingSpace = content.length() > 1 && Character.isWhitespace(content.charAt(content.length() - 1)) && whitespaceAllowed;
+                        boolean writeLeadingSpace = content.length() > 0 && (Character.isWhitespace(content.charAt(0)));
+                        boolean writeEndingSpace = content.length() > 1 && Character.isWhitespace(content.charAt(content.length() - 1));
                         content = content.trim();
                         if (content.length() != 0) {
                             boolean hasPrevContent = false;
                             int order = tagChildren.indexOf(item);
-                            if (order >= 2 && childrenIt.hasNext()) {
+                            if (order >= 2) {
                                 Object prev = tagChildren.get(order-1);
                                 hasPrevContent = isContentOrInline(prev);
                             }
 
-                            if (writeLeadingSpace || hasPrevContent) {
+                            if (writeLeadingSpace && (whitespaceAllowed || hasPrevContent)) {
                                 writer.write(' ');
                             }
 
@@ -116,7 +116,7 @@ public class BrowserCompactXmlSerializer extends XmlSerializer {
                                 childrenIt.previous();
                             }
 
-                            if (writeEndingSpace || hasFollowingContent) {
+                            if (writeEndingSpace && (whitespaceAllowed || hasFollowingContent)) {
                                 writer.write(' ');
                             }
                         } else{
