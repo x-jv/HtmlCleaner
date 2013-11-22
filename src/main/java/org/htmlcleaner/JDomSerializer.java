@@ -34,6 +34,12 @@ public class JDomSerializer {
 
     public Document createJDom(TagNode rootNode) {
         this.factory = new DefaultJDOMFactory();
+        
+        //
+        // If there is no actual root node then return nothing
+        //
+        if (rootNode.getName() == null) return null;
+        
         Element rootElement = createElement(rootNode);
         Document document = this.factory.document(rootElement);
 
