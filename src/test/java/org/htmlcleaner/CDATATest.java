@@ -314,5 +314,13 @@ public class CDATATest extends AbstractHtmlCleanerTest {
     	assertEquals("\n#ampmep_188 { }\n", content);
 
     }
+    
+    @Test
+    public void preserveComments() throws IOException{
+    	cleaner.getProperties().setOmitXmlDeclaration(false);
+    	String initial = readFile("src/test/resources/test17.html");
+    	String expected = readFile("src/test/resources/test17_expected.html");
+    	assertCleaned(initial, expected);
+    }
 
 }
