@@ -144,9 +144,23 @@ public class CDATATest extends AbstractHtmlCleanerTest {
                 + "// ]]>\n"
                 + "</script>");
         
-        //assertHTML("<script>/*<![CDATA[*/\n<>\n/*]]>*/</script>", "<script>&lt;&gt;</script>");
         assertHTML("<script>/*<![CDATA[*/\n<>\n/*]]>*/</script>", "<script><></script>");
 
+    }
+    
+    //
+    // This is a specific test over at XWiki that we currently don't pass
+    //
+    @Test
+    public void escapingCDATA() throws IOException{
+        CleanerProperties cleanerProperties = new CleanerProperties();
+        cleanerProperties.setOmitXmlDeclaration(false);
+        cleanerProperties.setOmitDoctypeDeclaration(false);
+        cleanerProperties.setIgnoreQuestAndExclam(false);
+        cleanerProperties.setAddNewlineToHeadAndBody(false);
+        this.cleaner = new HtmlCleaner(cleanerProperties);
+        this.serializer = new SimpleXmlSerializer(cleaner.getProperties());
+        assertHTML("<script>/*<![CDATA[*/\n<>\n/*]]>*/</script>", "<script>&lt;&gt;</script>");    	
     }
     
     @Test
