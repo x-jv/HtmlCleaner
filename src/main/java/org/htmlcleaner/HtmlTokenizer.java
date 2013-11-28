@@ -793,6 +793,8 @@ public class HtmlTokenizer {
     
     private void cdata() throws IOException {
     	
+    	boolean preserveComments = false;
+    	
     	if (!_isScriptContext && !_isStyleContext){
     		//
     		// if we're not set to omit invalid CDATA, then we turn it into a regular ContentNode
@@ -806,6 +808,7 @@ public class HtmlTokenizer {
     	if (startsWith(CData.SAFE_BEGIN_CDATA)){
     		go(CData.SAFE_BEGIN_CDATA.length());
     	} else if (startsWith(CData.SAFE_BEGIN_CDATA_ALT)){
+    		preserveComments = true;
     		go (CData.SAFE_BEGIN_CDATA_ALT.length());
     	} else {
     		go(CData.BEGIN_CDATA.length());
@@ -835,6 +838,12 @@ public class HtmlTokenizer {
         	// add a token.
         	//
         	if (_isScriptContext || _isStyleContext || !props.isOmitCdataOutsideScriptAndStyle()){
+        		
+        			//
+        			// Preserve comments
+        			//
+        			if (preserveComments) addToken ( new ContentNode("//"));
+        		
             		String cdata = _saved.toString().substring(cdataStart);
             		addToken( new CData(cdata) );
         	}
