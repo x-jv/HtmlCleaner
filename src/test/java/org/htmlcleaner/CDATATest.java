@@ -116,33 +116,36 @@ public class CDATATest extends AbstractHtmlCleanerTest {
         this.cleaner = new HtmlCleaner(cleanerProperties);
         this.serializer = new SimpleXmlSerializer(cleaner.getProperties());
 
-        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/// Comment \nalert(\"Hello World\")\n //\n/*]]>*/</script>", 
+        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n// Comment \nalert(\"Hello World\")\n //\n/*]]>*/</script>", 
         "<script type=\"text/javascript\">// Comment \nalert(\"Hello World\")\n //\n</script>");
         
         assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\nalert(\"Hello World\")\n/*]]>*/</script>", 
-        "<script type=\"text/javascript\">//<![CDATA[\nalert(\"Hello World\")\n//]]></script>");
+        "<script type=\"text/javascript\"><![CDATA[\nalert(\"Hello World\")\n]]></script>");
         
         assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n//\nalert(\"Hello World\")\n// \n/*]]>*/</script>", 
-            "<script type=\"text/javascript\">//<![CDATA[\n//\nalert(\"Hello World\")\n// \n]]></script>");
+            "<script type=\"text/javascript\"><![CDATA[\n//\nalert(\"Hello World\")\n// \n]]></script>");
+        
+        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n//\nalert(\"Hello World\")\n// \n/*]]>*/</script>", 
+        "<script type=\"text/javascript\">//<![CDATA[\nalert(\"Hello World\")\n// ]]></script>");
 
-        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n\n"
-            + "function escapeForXML(origtext) {\n"
-            + "   return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n"
-            + "       .replace(/>/g,'&'+'gt;').replace(/\'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');"
-            + "}\n"
-            + "// \n/*]]>*/"
-            + "</script>", "<script type=\"text/javascript\">\n"
-            + "//<![CDATA[\n"
-            + "function escapeForXML(origtext) {\n"
-            + "   return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n"
-            + "       .replace(/>/g,'&'+'gt;').replace(/\'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');"
-            + "}\n"
-            + "// ]]>\n"
-            + "</script>");
-
-        //assertHTML("<script>//<![CDATA[\n<>\n//]]></script>", "<script>&lt;&gt;</script>");
-        assertHTML("<script>/*<![CDATA[*/<>/*]]>*/</script>", "<script><></script>");
-
+        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n"
+                + "// \n"
+                + "function escapeForXML(origtext) {\n"
+                + "   return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n"
+                + "       .replace(/>/g,'&'+'gt;').replace(/\'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');"
+                + "}\n"
+                + "// \n/*]]>*/"
+                + "</script>", "<script type=\"text/javascript\">\n"
+                + "// <![CDATA[\n"
+                + "function escapeForXML(origtext) {\n"
+                + "   return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n"
+                + "       .replace(/>/g,'&'+'gt;').replace(/\'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');"
+                + "}\n"
+                + "// ]]>\n"
+                + "</script>");
+        
+        //assertHTML("<script>/*<![CDATA[*/\n<>\n/*]]>*/</script>", "<script>&lt;&gt;</script>");
+        assertHTML("<script>/*<![CDATA[*/\n<>\n/*]]>*/</script>", "<script><></script>");
 
     }
     
@@ -264,8 +267,8 @@ public class CDATATest extends AbstractHtmlCleanerTest {
         	//
         	// We should have a CData node for the CDATA section
         	//
-        	assertTrue(script.getAllChildren().get(1) instanceof CData);
-        	CData cdata = (CData)script.getAllChildren().get(1);
+        	assertTrue(script.getAllChildren().get(2) instanceof CData);
+        	CData cdata = (CData)script.getAllChildren().get(2);
         	
         	String content = cdata.getContentWithoutStartAndEndTokens();
         	assertEquals("\nfunction escapeForXML(origtext) {\n return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n .replace(/>/g,'&'+'gt;').replace(/'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');}\n", content);
@@ -321,6 +324,15 @@ public class CDATATest extends AbstractHtmlCleanerTest {
     	String initial = readFile("src/test/resources/test17.html");
     	String expected = readFile("src/test/resources/test17_expected.html");
     	assertCleaned(initial, expected);
+    }
+    
+    @Test
+    public void preserveCommentsXwiki() throws IOException{
+    	cleaner.getProperties().setOmitXmlDeclaration(false);
+    	cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+    	assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n//\nalert(\"Hello World\")\n// \n/*]]>*/</script>",
+    			   "<script type=\"text/javascript\">//<![CDATA[\nalert(\"Hello World\")\n// ]]></script>"
+    	);
     }
 
 }
