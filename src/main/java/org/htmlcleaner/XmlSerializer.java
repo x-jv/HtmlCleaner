@@ -204,6 +204,14 @@ public abstract class XmlSerializer extends Serializer {
                 writer.write(">");
                 if (!tagNode.getText().toString().startsWith(CData.SAFE_BEGIN_CDATA)) {
                     writer.write(CData.SAFE_BEGIN_CDATA);
+                    //
+                    // Insert a newline after the CDATA start marker if there isn't
+                    // already a newline character there
+                    //
+                    if (!tagNode.getText().toString().equals("")){
+                    	char firstchar = tagNode.getText().toString().charAt(0);
+                    	if (firstchar != '\n' && firstchar !='\r') writer.write("\n");
+                    }
                 }
             } else {
                 writer.write(">");
@@ -262,6 +270,15 @@ public abstract class XmlSerializer extends Serializer {
                 // we need to put a javascript comment in front of the CDATA in case this is NOT xhtml
 
                 if (!tagNode.getText().toString().trim().endsWith(CData.SAFE_END_CDATA)) {
+                	//
+                	// Insert a newline character before the CDATA end marker if there isn't one
+                	// already at the end of the tag node content
+                	//
+                	if (tagNode.getText().toString().length() > 0){
+                		char lastchar = tagNode.getText().toString().charAt(tagNode.getText().toString().length()-1);
+                		if (lastchar != '\n' && lastchar !='\r') writer.write("\n");
+                	}
+                	// Write the CDATA end marker
                     writer.write(CData.SAFE_END_CDATA);
                 }
             }
