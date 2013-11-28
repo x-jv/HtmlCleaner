@@ -35,10 +35,10 @@ public class PropertiesTest extends TestCase {
         properties.setAdvancedXmlEscape(false);
         properties.setUseCdataForScriptAndStyle(true);
         xmlString = getXmlString(cleaner, properties);
-        String expected = "<script>" + CData.SAFE_BEGIN_CDATA + "var x=y&&z;" + CData.SAFE_END_CDATA
+        String expected = "<script>" + CData.SAFE_BEGIN_CDATA + "\nvar x=y&&z;\n" + CData.SAFE_END_CDATA
                 + "</script>";
         assertTrue("looking for :\"" + expected + "\" in :\n" + xmlString, xmlString.indexOf(expected) >= 0);
-        expected = "<style>" + CData.SAFE_BEGIN_CDATA + ".test{font-size:10;}" + CData.SAFE_END_CDATA
+        expected = "<style>" + CData.SAFE_BEGIN_CDATA + "\n.test{font-size:10;}\n" + CData.SAFE_END_CDATA
                 + "</style>";
         assertTrue("looking for :\"" + expected + "\" in :\n" + xmlString, xmlString.indexOf(expected) >= 0);
         properties.setUseCdataForScriptAndStyle(false);
@@ -582,7 +582,7 @@ public class PropertiesTest extends TestCase {
         properties.setIgnoreQuestAndExclam(false);
         HtmlCleaner cleaner = new HtmlCleaner(properties);
         TagNode node = cleaner.clean(html);
-        properties.setUseCdataForScriptAndStyle(false);
+        //properties.setUseCdataForScriptAndStyle(false);
         String xmlString = new SimpleXmlSerializer(properties).getAsString(node);
         assertEquals(html, xmlString);
     }
