@@ -452,7 +452,7 @@ public class SpecialEntities {
 	 * @return {@link SpecialEntity} if found.
 	 */
 	public SpecialEntity getSpecialEntity(String seq) {
-		if (seq.isEmpty()) return null;
+		if (seq.length() == 0) return null;
 	    int startIndex = seq.charAt(0) == '&'?1:0;
         int semiIndex = seq.indexOf(';');
         String entity;
