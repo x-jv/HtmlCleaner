@@ -628,6 +628,24 @@ public class HtmlCleaner {
     private boolean isStartToken(Object o) {
     	return (o instanceof TagNode) && !((TagNode)o).isFormed();
     }
+    
+    /**
+     * Checks whether we can allow a tag as "foreign markup".
+     * This means we must have namespace aware set to true, and we must
+     * either have a current xmlns declaration within scope that isn't for 
+     * HTML, or we have a namespace prefix on the tag
+     * @param cleanTimeValues
+     * @return
+     */
+    private boolean isAllowedAsForeignMarkup(String tagname, CleanTimeValues cleanTimeValues){
+    	if (!properties.isNamespacesAware()) return false;
+    	if (tagname.contains(":")) return true;
+    	if (cleanTimeValues.namespace == null || cleanTimeValues.namespace.size() == 0) return false;
+    	String ns = cleanTimeValues.namespace.peek();
+    	if (ns == null) return false;
+    	if (ns.equals("http://www.w3.org/1999/xhtml")) return false;
+    	return true;
+    }
 
 	/**
 	 * This method generally mutates flattened list of tokens into tree structure.
@@ -646,7 +664,7 @@ public class HtmlCleaner {
 				String tagName = endTagToken.getName();
 				TagInfo tag = getTagInfoProvider().getTagInfo(tagName);
 
-				if ( (tag == null && properties.isOmitUnknownTags()) || (tag != null && tag.isDeprecated() && properties.isOmitDeprecatedTags()) ) {
+				if ( (tag == null && properties.isOmitUnknownTags()) && !isAllowedAsForeignMarkup(tagName,cleanTimeValues) || (tag != null && tag.isDeprecated() && properties.isOmitDeprecatedTags()) ) {
 				    //tag is either unknown or deprecated, so we just prune the end token out
 				    nodeIterator.set(null);
 				} else if ( tag != null && !tag.allowsBody() ) {
@@ -660,6 +678,15 @@ public class HtmlCleaner {
                         //open tag found.. closing the node.. this will add all
                         //the nodes between open and end tokens to the children list of the tag node.
                         List closed = closeSnippet(nodeList, matchingPosition, endTagToken, cleanTimeValues);
+                        
+                    	//
+                    	// Get the open start tag. If it contained an xmlns, then we remove it from the current namespace stack
+                    	//
+                    	TagNode startingTag = (TagNode) closed.get(0);
+                    	if (startingTag.hasAttribute("xmlns")){
+                    		cleanTimeValues.namespace.pop();
+                    	}
+                    	
                         nodeIterator.set(null);
                         for (int i = closed.size() - 1; i >= 0; i--) {
                             TagNode closedTag = (TagNode) closed.get(i);
@@ -735,7 +762,16 @@ public class HtmlCleaner {
                 // add tag to set of all tags
                
                 cleanTimeValues.allTags.add(tagName);
-
+                
+                //
+                // If there is an XMLNS attribute, push a namespace
+                // onto the namespaces stack - this means that we
+                // consider child tags to be within this namespace
+                //
+                if (startTagToken.hasAttribute("xmlns")){
+                	cleanTimeValues.namespace.push(startTagToken.getAttributeByName("xmlns"));
+                }
+                
                 // HTML open tag
                 if ( "html".equals(tagName) ) {
 					addAttributesToTag(cleanTimeValues.htmlNode, startTagToken.getAttributes());
@@ -751,7 +787,8 @@ public class HtmlCleaner {
                     addAttributesToTag(cleanTimeValues.headNode, startTagToken.getAttributes());
 					nodeIterator.set(null);
                 // unknown HTML tag and unknown tags are not allowed
-                } else if ( tag == null && properties.isOmitUnknownTags()) {
+				// unless we have set the namespace-aware option, and the current NS is valid
+                } else if ( tag == null && properties.isOmitUnknownTags() && !isAllowedAsForeignMarkup(tagName, cleanTimeValues)) {
                     nodeIterator.set(null);
                     properties.fireUglyHtml(true, startTagToken, ErrorType.Unknown);
                 } else if ( tag != null && tag.isDeprecated() && properties.isOmitDeprecatedTags()) {

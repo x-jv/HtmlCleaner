@@ -445,7 +445,7 @@ public class HtmlTokenizer {
         if (tagName != null) {
             ITagInfoProvider tagInfoProvider = cleaner.getTagInfoProvider();
             TagInfo tagInfo = tagInfoProvider.getTagInfo(tagName);
-            if ( (tagInfo == null && !props.isOmitUnknownTags() && props.isTreatUnknownTagsAsContent() && !isReservedTag(tagName)) ||
+            if ( (tagInfo == null && !props.isOmitUnknownTags() && props.isTreatUnknownTagsAsContent() && !isReservedTag(tagName) && !props.isNamespacesAware()) ||
                  (tagInfo != null && tagInfo.isDeprecated() && !props.isOmitDeprecatedTags() && props.isTreatDeprecatedTagsAsContent()) ) {
                 content();
                 return;
@@ -516,7 +516,7 @@ public class HtmlTokenizer {
         if (tagName != null) {
             ITagInfoProvider tagInfoProvider = cleaner.getTagInfoProvider();
             TagInfo tagInfo = tagInfoProvider.getTagInfo(tagName);
-            if ( (tagInfo == null && !props.isOmitUnknownTags() && props.isTreatUnknownTagsAsContent() && !isReservedTag(tagName)) ||
+        	if ( (tagInfo == null && !props.isOmitUnknownTags() && props.isTreatUnknownTagsAsContent() && !isReservedTag(tagName) &&!props.isNamespacesAware()) ||
                  (tagInfo != null && tagInfo.isDeprecated() && !props.isOmitDeprecatedTags() && props.isTreatDeprecatedTagsAsContent()) ) {
                 content();
                 return;

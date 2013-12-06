@@ -63,4 +63,12 @@ class CleanTimeValues {
     Set<ITagNodeCondition> pruneTagSet = new HashSet<ITagNodeCondition>();
     Set<TagNode> pruneNodeSet = new HashSet<TagNode>();
     Set<ITagNodeCondition> allowTagSet;
+    
+    /**
+     * A stack of namespaces for currently open tags. Every xmlns declaration
+     * on a tag adds another namespace to the stack, which is removed when the
+     * tag is closed. In this way you can keep track of what namespace a tag
+     * belongs to.
+     */
+    transient Stack<String> namespace = new Stack<String>();
 }
