@@ -662,7 +662,7 @@ public class HtmlCleaner {
             if (token instanceof EndTagToken) {
 				EndTagToken endTagToken = (EndTagToken) token;
 				String tagName = endTagToken.getName();
-				TagInfo tag = getTagInfoProvider().getTagInfo(tagName);
+                TagInfo tag = getTagInfo(tagName, cleanTimeValues);
 
 				if ( (tag == null && properties.isOmitUnknownTags()) && !isAllowedAsForeignMarkup(tagName,cleanTimeValues) || (tag != null && tag.isDeprecated() && properties.isOmitDeprecatedTags()) ) {
 				    //tag is either unknown or deprecated, so we just prune the end token out
@@ -754,7 +754,7 @@ public class HtmlCleaner {
 			} else if ( isStartToken(token) ) {
                 TagNode startTagToken = (TagNode) token;
 				String tagName = startTagToken.getName();
-				TagInfo tag = getTagInfoProvider().getTagInfo(tagName);
+				TagInfo tag = getTagInfo(tagName, cleanTimeValues);
 
                 TagPos lastTagPos = getOpenTags(cleanTimeValues).isEmpty() ? null : getOpenTags(cleanTimeValues).getLastTagPos();
                 TagInfo lastTagInfo = lastTagPos == null ? null : getTagInfoProvider().getTagInfo(lastTagPos.name);
@@ -992,7 +992,7 @@ public class HtmlCleaner {
                 }
 
                 TagNode newTagNode = createTagNode(startTagToken);
-                TagInfo tag = getTagInfoProvider().getTagInfo( newTagNode.getName() );
+                TagInfo tag = getTagInfo(newTagNode.getName(), cleanTimeValues);
                 addPossibleHeadCandidate(tag, newTagNode, cleanTimeValues);
                 if (tagNode != null) {
 					tagNode.addChildren(itemsToMove);
@@ -1068,6 +1068,21 @@ public class HtmlCleaner {
     protected void addPruneNode(TagNode node, CleanTimeValues cleanTimeValues) {
     	node.setPruned(true);
     	cleanTimeValues.pruneNodeSet.add(node);
+    }
+    
+    /**
+     * Returns a TagInfo object for the specified tag name.
+     * If the tag is foreign markup, we leave it as null. This is because we may get
+	 * name clashes, e.g. svg:title
+	 * 
+     * @param tagName
+     * @param cleanTimeValues
+     * @return a TagInfo object, or null if no matching TagInfo is found
+     */
+    private TagInfo getTagInfo(String tagName, CleanTimeValues cleanTimeValues){
+		TagInfo tag = null;
+		if (!isAllowedAsForeignMarkup(tagName,cleanTimeValues)) tag = getTagInfoProvider().getTagInfo(tagName);
+		return tag;
     }
 
     private boolean addIfNeededToPruneSet(TagNode tagNode, CleanTimeValues cleanTimeValues) {
