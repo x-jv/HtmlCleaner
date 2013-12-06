@@ -95,7 +95,7 @@ public class PropertiesTest extends TestCase {
         CleanerProperties properties = cleaner.getProperties();
         String xmlString;
         properties.setAdvancedXmlEscape(false);
-
+        properties.setNamespacesAware(false);
         properties.setOmitUnknownTags(false);
         properties.setTreatUnknownTagsAsContent(true);
         xmlString = getXmlString(cleaner, properties);
