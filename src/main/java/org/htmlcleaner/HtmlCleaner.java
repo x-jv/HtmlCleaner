@@ -509,6 +509,14 @@ public class HtmlCleaner {
         }
         Map<String, String> atts = cleanTimeValues.rootNode.getAttributes();
 
+        
+        //
+        // Add root namespace from xmlns if its given, for example XHTML or SVG
+        //
+        if (cleanTimeValues.rootNode.hasAttribute("xmlns")){
+        	cleanTimeValues.rootNode.addNamespaceDeclaration("", cleanTimeValues.rootNode.getAttributeByName("xmlns"));
+        }
+        
         if (properties.isNamespacesAware() && namespacePrefixes != null) {
             Iterator<String> iterator = namespacePrefixes.iterator();
             while (iterator.hasNext()) {
@@ -770,6 +778,7 @@ public class HtmlCleaner {
                 //
                 if (startTagToken.hasAttribute("xmlns")){
                 	cleanTimeValues.namespace.push(startTagToken.getAttributeByName("xmlns"));
+                	startTagToken.addNamespaceDeclaration("", startTagToken.getAttributeByName("xmlns"));
                 }
                 
                 // HTML open tag
