@@ -49,7 +49,6 @@ public class SVGTest extends AbstractHtmlCleanerTest{
 		String initial = readFile("src/test/resources/test18.html");
 		String expected = readFile("src/test/resources/test18_expected.html"); 
 		
-		System.out.println(initial);
 		assertCleaned(initial,expected);
 	}
 	
