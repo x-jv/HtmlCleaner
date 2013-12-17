@@ -32,8 +32,12 @@
 */
 package org.htmlcleaner;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 
+import org.jdom2.Document;
+import org.jdom2.Namespace;
 import org.junit.Test;
 
 public class JDomSerializerTest extends AbstractHtmlCleanerTest {
@@ -62,8 +66,10 @@ public class JDomSerializerTest extends AbstractHtmlCleanerTest {
     	String initial = readFile("src/test/resources/test22.html");
     	TagNode tagNode = cleaner.clean(initial);
     	JDomSerializer ser = new JDomSerializer(cleaner.getProperties());
-    	ser.createJDom(tagNode);
+    	Document doc = ser.createJDom(tagNode);
+    	assertEquals("org.jdom2.CDATA", doc.getRootElement().getChild("head").getChild("script").getContent().get(0).getClass().getName());
     }
+    
 	/**
 	 * See issue 106
 	 * @throws IOException
@@ -75,6 +81,28 @@ public class JDomSerializerTest extends AbstractHtmlCleanerTest {
     	String initial = readFile("src/test/resources/test22.html");
     	TagNode tagNode = cleaner.clean(initial);
     	JDomSerializer ser = new JDomSerializer(cleaner.getProperties());
-    	ser.createJDom(tagNode);
+    	Document doc = ser.createJDom(tagNode);
+    	assertEquals("org.jdom2.Text", doc.getRootElement().getChild("head").getChild("script").getContent().get(0).getClass().getName());
+    }
+    
+    /**
+     * Test we handle foreign markup OK
+     * @throws Exception
+     */
+    @Test
+    public void namespaces() throws Exception{
+	    cleaner.getProperties().setNamespacesAware(true);
+		String initial = readFile("src/test/resources/test21.html");
+		TagNode tagNode = cleaner.clean(initial);
+		JDomSerializer ser = new JDomSerializer(cleaner.getProperties());
+		Document doc = ser.createJDom(tagNode);
+		
+		//
+		// These will fail with an NPE if the namespaces are not correct
+		//
+		doc.getRootElement().getChild("body", Namespace.getNamespace("http://www.w3.org/1999/xhtml")).getNamespaceURI();
+		doc.getRootElement().getChild("body", Namespace.getNamespace("http://www.w3.org/1999/xhtml")).getChild("svg", Namespace.getNamespace("http://www.w3.org/2000/svg")).getNamespaceURI();
+		doc.getRootElement().getChild("body", Namespace.getNamespace("http://www.w3.org/1999/xhtml")).getChild("svg", Namespace.getNamespace("http://www.w3.org/2000/svg")).getChild("title", Namespace.getNamespace("http://www.w3.org/2000/svg"));
+
     }
 }
