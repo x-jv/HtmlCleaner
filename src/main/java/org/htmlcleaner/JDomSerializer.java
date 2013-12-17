@@ -153,6 +153,15 @@ public class JDomSerializer {
                     if (escapeXml && !specialCase) {
                         content = Utils.escapeXml(content, props, true);
                     }
+                    
+                    //
+                    // For CDATA sections we don't want to return the start and
+                    // end tokens. See issue #106.
+                    //
+                    if (specialCase && item instanceof CData){
+                    	content = ((CData)item).getContentWithoutStartAndEndTokens();
+                    }
+                    
                     Text text = specialCase ? factory.cdata(content) : factory.text(content);
                     element.addContent(text);
                 } else if (item instanceof TagNode) {
