@@ -32,9 +32,11 @@
 */
 package org.htmlcleaner;
 
+import java.io.IOException;
+
 import org.junit.Test;
 
-public class JDomSerializerTest {
+public class JDomSerializerTest extends AbstractHtmlCleanerTest {
 
 
 	/**
@@ -48,5 +50,31 @@ public class JDomSerializerTest {
 		TagNode tagNode = new HtmlCleaner(props).clean(validhtml5StringCode);
 		new JDomSerializer(props, true).createJDom(tagNode);
 	}
-
+	
+	/**
+	 * See issue 106
+	 * @throws IOException
+	 */
+    @Test
+    public void CDATA() throws Exception{
+    	cleaner.getProperties().setUseCdataForScriptAndStyle(true);
+    	cleaner.getProperties().setOmitCdataOutsideScriptAndStyle(true);
+    	String initial = readFile("src/test/resources/test22.html");
+    	TagNode tagNode = cleaner.clean(initial);
+    	JDomSerializer ser = new JDomSerializer(cleaner.getProperties());
+    	ser.createJDom(tagNode);
+    }
+	/**
+	 * See issue 106
+	 * @throws IOException
+	 */
+    @Test
+    public void noCDATA() throws Exception{
+    	cleaner.getProperties().setUseCdataForScriptAndStyle(false);
+    	cleaner.getProperties().setOmitCdataOutsideScriptAndStyle(true);
+    	String initial = readFile("src/test/resources/test22.html");
+    	TagNode tagNode = cleaner.clean(initial);
+    	JDomSerializer ser = new JDomSerializer(cleaner.getProperties());
+    	ser.createJDom(tagNode);
+    }
 }
