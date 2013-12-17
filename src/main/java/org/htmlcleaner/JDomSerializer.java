@@ -128,10 +128,18 @@ public class JDomSerializer {
                     }
                 }
             }
-            if (ns == null) {
-                element.setAttribute(attrName, attrValue);
-            } else {
-                element.setAttribute(attrName, attrValue, ns);
+            
+            //
+            // Don't manually add xmlns attributes as these should be 
+            // handled automatically by JDOM through the namespace
+            // mechanism
+            //
+            if (!attrName.equals("xmlns")){
+	            if (ns == null) {
+	                element.setAttribute(attrName, attrValue);
+	            } else {
+	                element.setAttribute(attrName, attrValue, ns);
+	            }
             }
         }
     }
