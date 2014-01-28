@@ -34,20 +34,14 @@
 package org.htmlcleaner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-import org.junit.BeforeClass;
+import java.io.IOException;
+
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-public class DomSerializerTest {
-
-    private static HtmlCleaner cleaner;
-
-    @BeforeClass
-    public static void setUp() throws Exception
-    {
-        cleaner = new HtmlCleaner();
-    }
+public class DomSerializerTest extends AbstractHtmlCleanerTest {
 
     @Test
     public void testCDATA() throws Exception
@@ -78,6 +72,23 @@ public class DomSerializerTest {
     	String content = output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getChildNodes().item(2).getNodeValue();
     	assertEquals("\nfunction escapeForXML(origtext) {\n return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n .replace(/>/g,'&'+'gt;').replace(/'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');}\n", content);    	
     }
+    
+	/**
+	 * See issue 108
+	 * @throws IOException
+	 */
+    @Test
+    public void html5doctype() throws Exception{
+    	cleaner.getProperties().setUseCdataForScriptAndStyle(true);
+    	cleaner.getProperties().setOmitCdataOutsideScriptAndStyle(true);
+    	String initial = readFile("src/test/resources/test23.html");
+    	TagNode tagNode = cleaner.clean(initial);
+    	DomSerializer ser = new DomSerializer(cleaner.getProperties());
+    	Document dom = ser.createDOM(tagNode);
+    	assertNotNull(dom.getChildNodes().item(0).getChildNodes().item(0));
+    	assertEquals("head", dom.getChildNodes().item(0).getChildNodes().item(0).getNodeName());
+    }
+
   
 	
 }
