@@ -64,6 +64,13 @@ import java.util.StringTokenizer;
  */
 public class XPather {
 
+	private static final int C0 = '0';
+	private static final int C9 = '9';
+	private static final int CD = '.';
+	private static final int CP = '+';
+	private static final int CM = '-';
+	private static final int CS = ' ';
+	
     // array of basic tokens of which XPath expression is made
     private String tokenArray[];
 
@@ -204,23 +211,37 @@ public class XPather {
         return "";
     }
 
-    private boolean isValidInteger(String s) {
-        try {
-            Integer.parseInt(s);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
+	private static boolean isValidInteger(String value) {
+	    final int l = value.length();
+	    if(l > 0) {
+	        int i = 1, c = value.charAt(0);
+	        if(c == CP || c == CM || (c >= C0 && c <= C9)) {
+	            for (; i < l; i++) {
+	                c = value.charAt(i);
+	                if (c < C0 || c > C9)
+	                    return false;
+	            }
+	            return true;
+	        }
+	    }
+	    return false;
+	}
 
-    private boolean isValidDouble(String s) {
-        try {
-            Double.parseDouble(s);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
+	private boolean isValidDouble(String value) {
+	    final int l = value.length();
+	    if(l > 0) {
+	        int i = 1, c = value.charAt(0);
+	        if(c == CP || c == CM || c == CS || (c >= C0 && c <= C9)) {
+	            for (; i < l; i++) {
+	                c = value.charAt(i);
+	                if (c != CD && (c < C0 || c > C9)) 
+	                    return false;
+	            }
+	            return true;
+	        }
+	    }
+	    return false;
+	}
 
     /**
      * Checks if given string is valid identifier.
