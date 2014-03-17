@@ -47,7 +47,7 @@ public class SpecialEntitiesTest extends AbstractHtmlCleanerTest {
 	public void twoCharacterEntity() throws IOException{
 		this.serializer = new SimpleHtmlSerializer(this.cleaner.getProperties());
 		String input = "<html><head></head><body><p>&; test &;</p></body></html>";
-		String expected = "<html><head></head><body><p>&; test &;</p></body></html>";
+		String expected = "<html><head></head><body><p>&amp;; test &amp;;</p></body></html>";
 		try {
 			assertCleaned(input, expected);
 		} catch (Exception e) {
