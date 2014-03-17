@@ -176,7 +176,16 @@ public class DomSerializer {
                         if (escapeXml) {
                             attrValue = Utils.escapeXml(attrValue, props, true);
                         }
+                        
                         subelement.setAttribute(attrName, attrValue);
+                        
+                        //
+                        // Flag the attribute as an ID attribute if appropriate. Thanks to Chris173
+                        //
+                        if (attrName.equalsIgnoreCase("id")) {
+                        	subelement.setIdAttribute(attrName, true);
+                        }
+                        
                     }
 
                     // recursively create subnodes
