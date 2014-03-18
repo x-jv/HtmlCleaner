@@ -136,6 +136,17 @@ public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
         HtmlCleaner c = new HtmlCleaner(cp);
         TagNode root = c.clean(in);
     }
-
-
+    
+    /**
+     * Check that we no longer require block-level restrictions for anchors, as per HTML5. See issue #82
+     * @throws IOException
+     */
+	@Test
+	public void noAnchorBlockLevelRestriction() throws IOException{
+        
+		String initial = readFile("src/test/resources/test24.html");
+		String expected = readFile("src/test/resources/test24_expected.html"); 
+		
+		assertCleaned(initial,expected);
+	}
 }
