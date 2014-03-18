@@ -92,4 +92,18 @@ public class SVGTest extends AbstractHtmlCleanerTest{
 
 		assertCleaned(initial,expected);
 	}
+	
+	@Test
+	public void preserveSVGstylesInPlace() throws IOException{
+		
+        cleaner.getProperties().setOmitXmlDeclaration(false);
+        cleaner.getProperties().setOmitDoctypeDeclaration(false);
+        cleaner.getProperties().setNamespacesAware(true);
+        cleaner.getProperties().setOmitUnknownTags(true);
+        
+		String initial = readFile("src/test/resources/test25.html");
+		String expected = readFile("src/test/resources/test25_expected.html"); 
+
+		assertCleaned(initial,expected);
+	}
 }
