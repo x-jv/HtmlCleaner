@@ -221,7 +221,6 @@ public class TagNode extends TagToken implements HtmlNode {
      * @return true if TagNode has attribute
      */
     public boolean hasAttribute(String attName) {
-    	System.out.println("has?"+attName);
     	if (attName == null) return false;
     	
     	//
@@ -248,7 +247,6 @@ public class TagNode extends TagToken implements HtmlNode {
             String value = attValue == null ? "" : attValue.trim().replaceAll("\\p{Cntrl}", " ");
             if (trim.length() != 0) {
                 attributes.put(trim, value);
-                System.out.println("added "+trim);
             }
         }
     }
