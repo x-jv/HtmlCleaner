@@ -781,6 +781,15 @@ public class HtmlCleaner {
                 	startTagToken.addNamespaceDeclaration("", startTagToken.getAttributeByName("xmlns"));
                 }
                 
+                //
+                // Set the foreign markup flag if appropriate
+                //
+                if (isAllowedAsForeignMarkup(tagName, cleanTimeValues)){
+                	startTagToken.setForeignMarkup(true);
+                } else {
+                	startTagToken.setForeignMarkup(false);                	
+                }
+                
                 // HTML open tag
                 if ( "html".equals(tagName) ) {
 					addAttributesToTag(cleanTimeValues.htmlNode, startTagToken.getAttributes());

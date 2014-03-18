@@ -461,7 +461,7 @@ public class HtmlTokenizer {
 
             if (tagName != null) {
                 if (transformations != null) {
-                    tagNode.setAttributes(transformations.transformAttributes(originalTagName, tagNode.getAttributes()));
+                    tagNode.setAttributes(transformations.transformAttributes(originalTagName, tagNode.getAttributesInLowerCase()));
                 }
                 addToken(_currentTagToken);
             }
