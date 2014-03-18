@@ -19,8 +19,8 @@
             <name>BSD License</name>
             <url>http://www.opensource.org/licenses/bsd-license.php</url>
             <comments>
-                OWNER = Vladimir Nikic
-                YEAR = 2006-2013
+                OWNER = Vladimir Nikic, Pat Moore and Scott Wilson
+                YEAR = 2006-2014
             </comments>
             <distribution>repo</distribution>
         </license>
