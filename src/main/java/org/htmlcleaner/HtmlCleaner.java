@@ -765,7 +765,7 @@ public class HtmlCleaner {
 				TagInfo tag = getTagInfo(tagName, cleanTimeValues);
 
                 TagPos lastTagPos = getOpenTags(cleanTimeValues).isEmpty() ? null : getOpenTags(cleanTimeValues).getLastTagPos();
-                TagInfo lastTagInfo = lastTagPos == null ? null : getTagInfoProvider().getTagInfo(lastTagPos.name);
+                TagInfo lastTagInfo = lastTagPos == null ? null : getTagInfo(lastTagPos.name, cleanTimeValues);
 
                 // add tag to set of all tags
                
@@ -777,8 +777,19 @@ public class HtmlCleaner {
                 // consider child tags to be within this namespace
                 //
                 if (startTagToken.hasAttribute("xmlns")){
-                	cleanTimeValues.namespace.push(startTagToken.getAttributeByName("xmlns"));
-                	startTagToken.addNamespaceDeclaration("", startTagToken.getAttributeByName("xmlns"));
+                	
+                	String ns = startTagToken.getAttributeByName("xmlns");
+                	
+                	//
+                	// If this is the HTML tag, and the namespace is the legacy HTML NS, remove the
+                	// xmlns attribute
+                	//
+                	if ( "html".equals(tagName) && ns.equals("http://www.w3.org/TR/REC-html40")) {
+                		startTagToken.removeAttribute("xmlns");
+                	} else {
+                		cleanTimeValues.namespace.push(ns);
+                		startTagToken.addNamespaceDeclaration("", ns);
+                	}
                 }
                 
                 //
