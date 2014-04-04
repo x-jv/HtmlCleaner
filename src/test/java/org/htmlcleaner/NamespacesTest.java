@@ -71,4 +71,58 @@ public class NamespacesTest  extends AbstractHtmlCleanerTest{
 		String expected = readFile("src/test/resources/test15_expected.html");
 		assertCleaned(initial, expected);
     }
+    
+    /**
+     * If we aren't NS aware, strip out the xmlns attr and process everything 
+     * as HTML.
+     */
+	@Test
+	public void testTableCellsWithoutNamespaceAwareness() throws IOException{
+		cleaner.getProperties().setNamespacesAware(false);
+		String initial = readFile("src/test/resources/test26.html");
+		String expected = readFile("src/test/resources/test26_expected.html");
+		assertCleaned(initial, expected);
+	}
+	
+	/**
+	 * If we are namespace-aware and use the legacy HTML namespace, we should 
+	 * treat the content as HTML. See issue #115
+	 */
+	@Test
+	public void testTableCellsUsingNamespaceAwareAndLegacyHtmlNS() throws IOException{
+		cleaner.getProperties().setNamespacesAware(true);
+		cleaner.getProperties().setOmitUnknownTags(true);
+		String initial = readFile("src/test/resources/test26.html");
+		String expected = readFile("src/test/resources/test26_expected.html");
+		assertCleaned(initial, expected);
+	}
+	
+	/**
+	 * If we're NS-aware and using XHTML, treat the content as HTML tags and 
+	 * insert TBODY into the table (etc) but retain the xmlns attr on the html 
+	 * tag
+	 */
+	@Test
+	public void testTableCellsUsingNamespaceAwareAndXhtmlNS() throws IOException{
+		cleaner.getProperties().setNamespacesAware(true);
+		cleaner.getProperties().setOmitUnknownTags(true);
+		String initial = readFile("src/test/resources/test27.html");
+		String expected = readFile("src/test/resources/test27_expected.html");
+		assertCleaned(initial, expected);
+	}
+	
+	/**
+	 * If we are namespace-aware and use an unknown namespace,
+	 * all the content will be treated as foreign markup; this means
+	 * there will be no insertion of TBODY tags as the table element
+	 * is not interpreted as being a HTML table element
+	 */
+	@Test
+	public void testTableCellsUsingNamespaceAwareAndUnknownNS() throws IOException{
+		cleaner.getProperties().setNamespacesAware(true);
+		cleaner.getProperties().setOmitUnknownTags(true);
+		String initial = readFile("src/test/resources/test28.html");
+		String expected = readFile("src/test/resources/test28_expected.html");
+		assertCleaned(initial, expected);
+	}
 }
