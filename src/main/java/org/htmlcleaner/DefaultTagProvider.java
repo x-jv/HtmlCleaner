@@ -51,9 +51,19 @@ public class DefaultTagProvider implements ITagInfoProvider {
     // singleton instance, used if no other TagInfoProvider is specified
     public final static DefaultTagProvider INSTANCE= new DefaultTagProvider();
     
-    private static final String CLOSE_BEFORE_COPY_INSIDE_TAGS = "bdo"+STRONG+"em,q,b,i,u,tt,sub,sup,big,small,strike,s,font";
+    private static final String CLOSE_BEFORE_COPY_INSIDE_TAGS = "bdo,"+STRONG+",em,q,b,i,u,tt,sub,sup,big,small,strike,s,font";
     private static final String CLOSE_BEFORE_TAGS = "h1,h2,h3,h4,h5,h6,p,address,label,abbr,acronym,dfn,kbd,samp,var,cite,code,param,xml";
+    
+    /**
+     * Phrasing tags are those that can make up paragraphs along with text to make Phrasing Content
+     */
+    private static final String PHRASING_TAGS = "a,abbr,area,audio,b,bdi,bdo,br,button,canvas,cite,code,data,datalist,del,dfn,em,embed,i,iframe,img,input,ins,kbd,keygen,label,link,map,mark,math,meta,meter,noscript,object,output,progress,q,ruby,s,samp,script,select,small,span,strong,sub,sup,svg,template,textarea,time,u,var,video,wbr";
 
+    /**
+     * HTML5 Media Tags
+     */
+    private static final String MEDIA_TAGS = "audio,video";
+    
     public DefaultTagProvider() {
         TagInfo tagInfo;
         
@@ -73,6 +83,140 @@ public class DefaultTagProvider implements ITagInfoProvider {
         tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
         tagInfo.defineCloseBeforeTags("p,address,label,abbr,acronym,dfn,kbd,samp,var,cite,code,param,xml");
         this.put("div", tagInfo);
+        
+        /**
+         * The HTML5 semantic flow tags
+         */
+        
+        // Sectioning tags
+        tagInfo = new TagInfo("aside", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
+        tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
+        tagInfo.defineCloseBeforeTags("p");
+        this.put("aside", tagInfo);
+        
+        tagInfo = new TagInfo("section", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
+        tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
+        tagInfo.defineCloseBeforeTags("p");
+        this.put("section", tagInfo);
+        
+        tagInfo = new TagInfo("article", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
+        tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
+        tagInfo.defineCloseBeforeTags("p");
+        this.put("article", tagInfo);
+        
+        tagInfo = new TagInfo("main", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
+        tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
+        tagInfo.defineCloseBeforeTags("p");
+        this.put("main", tagInfo);
+        
+        tagInfo = new TagInfo("nav", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
+        tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
+        tagInfo.defineCloseBeforeTags("p");
+        this.put("nav", tagInfo);
+        
+        tagInfo = new TagInfo("details", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
+        tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
+        tagInfo.defineCloseBeforeTags("p");
+        this.put("details", tagInfo);
+        tagInfo = new TagInfo("summary", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
+        tagInfo.defineRequiredEnclosingTags("details");
+        tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
+        tagInfo.defineCloseBeforeTags("p");
+        this.put("summary", tagInfo);
+        
+        tagInfo = new TagInfo("figure", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
+        tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
+        tagInfo.defineCloseBeforeTags("p");
+        this.put("figure", tagInfo);
+        tagInfo = new TagInfo("figcaption", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.any);
+        tagInfo.defineRequiredEnclosingTags("figure");
+        this.put("figcaption", tagInfo);
+        
+        // header and footer
+        tagInfo = new TagInfo("header", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
+        tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
+        tagInfo.defineCloseBeforeTags("p,header,footer,main");
+        this.put("header", tagInfo);
+        
+        tagInfo = new TagInfo("footer", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
+        tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
+        tagInfo.defineCloseBeforeTags("p,header,footer,main");
+        this.put("footer", tagInfo);
+        
+        /**
+         * Html5 phrasing tags
+         */
+        tagInfo = new TagInfo("mark", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.inline);
+        tagInfo.defineAllowedChildrenTags(PHRASING_TAGS);
+        this.put("mark", tagInfo);
+
+        tagInfo = new TagInfo("bdi", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.inline);
+        tagInfo.defineAllowedChildrenTags(PHRASING_TAGS);
+        this.put("bdi", tagInfo);
+        
+        tagInfo = new TagInfo("time", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.inline);
+        tagInfo.defineAllowedChildrenTags(PHRASING_TAGS);
+        this.put("time", tagInfo);
+        
+        tagInfo = new TagInfo("meter", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.inline);
+        tagInfo.defineAllowedChildrenTags(PHRASING_TAGS);
+        tagInfo.defineCloseBeforeTags("meter");
+        this.put("meter", tagInfo);
+        
+        
+        /**
+         * Html5 Ruby text
+         */
+        tagInfo = new TagInfo("ruby", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.inline);
+        tagInfo.defineAllowedChildrenTags("rt,rp");
+        this.put("ruby", tagInfo);
+        
+        tagInfo = new TagInfo("rt", ContentType.text, BelongsTo.BODY, false, false, false, CloseTag.optional, Display.inline);
+        tagInfo.defineRequiredEnclosingTags("ruby");
+        tagInfo.defineAllowedChildrenTags(PHRASING_TAGS);
+        this.put("rt", tagInfo);
+        
+        tagInfo = new TagInfo("rp", ContentType.text, BelongsTo.BODY, false, false, false, CloseTag.optional, Display.inline);
+        tagInfo.defineRequiredEnclosingTags("ruby");
+        tagInfo.defineAllowedChildrenTags(PHRASING_TAGS);
+        this.put("rp", tagInfo);
+        
+        /**
+         * Html5 media tags
+         */
+        tagInfo = new TagInfo("audio", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.any);
+        tagInfo.defineCloseInsideCopyAfterTags(MEDIA_TAGS);
+        this.put("audio", tagInfo);
+        
+        tagInfo = new TagInfo("video", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.any);
+        tagInfo.defineCloseInsideCopyAfterTags(MEDIA_TAGS);
+        this.put("video", tagInfo);
+        
+        tagInfo = new TagInfo("source", ContentType.none, BelongsTo.BODY, false, false, false, CloseTag.forbidden, Display.any);
+        tagInfo.defineRequiredEnclosingTags(MEDIA_TAGS);
+        this.put("source", tagInfo);
+        
+        tagInfo = new TagInfo("track", ContentType.none, BelongsTo.BODY, false, false, false, CloseTag.forbidden, Display.any);
+        tagInfo.defineRequiredEnclosingTags(MEDIA_TAGS);
+        this.put("track", tagInfo);
+        
+        tagInfo = new TagInfo("canvas", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.any);
+        this.put("canvas", tagInfo);
+        
+        /**
+         * Html5 interactive tags
+         */
+        tagInfo = new TagInfo("dialog", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.any);
+        this.put("dialog", tagInfo);
+        
+        tagInfo = new TagInfo("progress", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.any);
+        tagInfo.defineAllowedChildrenTags(PHRASING_TAGS);
+        tagInfo.defineCloseBeforeTags("progress");
+        this.put("progress", tagInfo);
+        
+        /**
+         * HTML 4 and earlier tags
+         */
 
         tagInfo = new TagInfo("span", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.inline);
         this.put("span", tagInfo);
@@ -275,7 +419,7 @@ public class DefaultTagProvider implements ITagInfoProvider {
         this.put("dir", tagInfo);
 
         tagInfo = new TagInfo("table", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
-        tagInfo.defineAllowedChildrenTags("tr,tbody,thead,tfoot,colgroup,caption,tr");
+        tagInfo.defineAllowedChildrenTags("tr,tbody,thead,tfoot,colgroup,caption");
         tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
         tagInfo.defineCloseBeforeTags("tr,thead,tbody,tfoot,caption,colgroup,table,p,address,label,abbr,acronym,dfn,kbd,samp,var,cite,code,param,xml");
         this.put("table", tagInfo);
