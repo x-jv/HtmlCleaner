@@ -55,6 +55,30 @@ public class CommandLine {
 
     private static final String OMITXMLDECL = "omitxmldecl";
 
+    /**
+     * If the specified argument name exists without a value, return true.
+     * If it exists with a value, translate it as a boolean.
+     * @param args the command line arguments
+     * @param name the switch name
+     * @return true, or false, depending on whether the switch has been specified
+     */
+    private static boolean getSwitchArgument(String[] args, String name){
+    	boolean value = false;
+    	for (String curr : args){
+    		int eqIndex = curr.indexOf('=');
+            if (eqIndex >= 0) {
+                String argName = curr.substring(0, eqIndex).trim();
+                String argValue = curr.substring(eqIndex+1).trim();
+                if (argName.toLowerCase().startsWith(name.toLowerCase())) {
+                    value = toBoolean(argValue);
+                }
+            } else {
+            	value = true;
+            }
+    	}
+    	return value;
+    }
+    
     private static String getArgValue(String[] args, String name, String defaultValue) {
         for (String curr : args) {
             int eqIndex = curr.indexOf('=');
@@ -157,7 +181,12 @@ public class CommandLine {
 
         final CleanerProperties props = cleaner.getProperties();
 
-        props.addHtmlModificationListener(new HtmlModificationListenerLogger(logger));
+        //
+        // If the user specifies "quiet" or "quiet=true" then we don't add a modification
+        // listener
+        //
+        if (!getSwitchArgument(args, "quiet"))
+            props.addHtmlModificationListener(new HtmlModificationListenerLogger(logger));
 
         if ( !"".equals(omitUnknownTags) ) {
             props.setOmitUnknownTags( toBoolean(omitUnknownTags) );
@@ -303,8 +332,10 @@ public class CommandLine {
         } else {
             new SimpleXmlSerializer(props).writeToStream(node, out, outCharset);
         }
-
-        System.out.println("Finished successfully in " + (System.currentTimeMillis() - start)+ "ms." );
+        
+        if (!getSwitchArgument(args, "quiet")){
+        	System.out.println("Finished successfully in " + (System.currentTimeMillis() - start)+ "ms." );
+        }
     }
 
 }
