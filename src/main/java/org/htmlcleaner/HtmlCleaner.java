@@ -1,4 +1,4 @@
-/*  Copyright (c) 2006-2007, Vladimir Nikic
+/*  Copyright (c) 2006-2014, The HtmlCleaner Project
     All rights reserved.
 
     Redistribution and use of this software in source and binary forms,
@@ -29,10 +29,6 @@
     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
     POSSIBILITY OF SUCH DAMAGE.
-
-    You can contact Vladimir Nikic by sending e-mail to
-    nikic_vladimir@yahoo.com. Please include the word "HtmlCleaner" in the
-    subject line.
 */
 
 package org.htmlcleaner;
@@ -875,7 +871,11 @@ public class HtmlCleaner {
 							Iterator copyIt = toBeCopied.iterator();
 							while (copyIt.hasNext()) {
 								TagNode currStartToken = (TagNode) copyIt.next();
-								nodeIterator.add( currStartToken.makeCopy() );
+                                if (!isCopiedTokenEqualToNextThreeCopiedTokens(currStartToken, nodeIterator)) {
+                                    nodeIterator.add(currStartToken.makeCopy());
+                                } else {
+                                    copyIt.remove();
+                                }
 							}
 
                             // back to the previous place, before adding new start tokens
@@ -922,6 +922,35 @@ public class HtmlCleaner {
 				}
 			}
 		}
+    }
+
+    /**
+     * Determines if a copied token is equal to the next 3 tokens in the iterator.
+     */
+    private static boolean isCopiedTokenEqualToNextThreeCopiedTokens(TagNode copiedStartToken, ListIterator<BaseToken> nodeIterator) {
+        int steps = 0;
+        int matches = 0;
+        while (nodeIterator.hasNext() && steps < 3) {
+            BaseToken nextToken = nodeIterator.next();
+            steps++;
+            if (nextToken instanceof TagNode && ((TagNode) nextToken).isCopy() && areCopiedTokensEqual((TagNode) nextToken, copiedStartToken)) {
+                matches++;
+            } else {
+                break;
+            }
+        }
+        for (int i = 0; i < steps; i++) {
+            nodeIterator.previous();
+        }
+        return matches == 3;
+    }
+
+    /**
+     * Determines if two copied tokens are equal.
+     */
+    private static boolean areCopiedTokensEqual(TagNode token1, TagNode token2) {
+        return token1.name.equals(token2.name) &&
+                token1.getAttributes().equals(token2.getAttributes());
     }
 
 	private void reopenBrokenNode(ListIterator<BaseToken> nodeIterator, TagNode toReopen, CleanTimeValues cleanTimeValues) {

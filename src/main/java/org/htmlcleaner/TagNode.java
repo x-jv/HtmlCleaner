@@ -1,4 +1,4 @@
-/*  Copyright (c) 2006-2013, HTMLCleaner project
+/*  Copyright (c) 2006-2014, HTMLCleaner project
     All rights reserved.
 
     Redistribution and use of this software in source and binary forms,
@@ -94,8 +94,19 @@ public class TagNode extends TagToken implements HtmlNode {
      */
     private boolean pruned;
 
+    /**
+     * Indicates that the node is a copy of another node.
+     * @see #makeCopy()
+     */
+    private final boolean isCopy;
+
     public TagNode(String name) {
-       super(name);
+        this(name, false);
+    }
+
+    private TagNode(String name, boolean isCopy) {
+        super(name);
+        this.isCopy = isCopy;
     }
     
 	/* (non-Javadoc)
@@ -751,9 +762,13 @@ public class TagNode extends TagToken implements HtmlNode {
     }
 
     public TagNode makeCopy() {
-        TagNode copy = new TagNode(name);
+        TagNode copy = new TagNode(name, true);
         copy.attributes.putAll(attributes);
         return copy;
+    }
+
+    public boolean isCopy() {
+        return isCopy;
     }
 
     /**
