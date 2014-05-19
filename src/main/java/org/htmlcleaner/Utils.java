@@ -80,6 +80,21 @@ public class Utils {
     }
 
     /**
+     * Escapes HTML string
+     * @param s String to be escaped
+     * @param props Cleaner properties affects escaping behaviour
+     * @return
+     */
+    public static String escapeHtml(String s, CleanerProperties props) {
+        boolean advanced = props.isAdvancedXmlEscape();
+        boolean recognizeUnicodeChars = props.isRecognizeUnicodeChars();
+        boolean translateSpecialEntities = props.isTranslateSpecialEntities();
+        boolean transResCharsToNCR = props.isTransResCharsToNCR();
+        boolean transSpecialEntitiesToNCR = props.isTransSpecialEntitiesToNCR();
+        return escapeXml(s, advanced, recognizeUnicodeChars, translateSpecialEntities, false, transResCharsToNCR, transSpecialEntitiesToNCR, true);    	
+    }
+
+    /**
      * Escapes XML string.
      * @param s String to be escaped
      * @param props Cleaner properties affects escaping behaviour
@@ -91,8 +106,9 @@ public class Utils {
         boolean translateSpecialEntities = props.isTranslateSpecialEntities();
         boolean transResCharsToNCR = props.isTransResCharsToNCR();
         boolean transSpecialEntitiesToNCR = props.isTransSpecialEntitiesToNCR();
-        return escapeXml(s, advanced, recognizeUnicodeChars, translateSpecialEntities, isDomCreation, transResCharsToNCR, transSpecialEntitiesToNCR);
+        return escapeXml(s, advanced, recognizeUnicodeChars, translateSpecialEntities, isDomCreation, transResCharsToNCR, transSpecialEntitiesToNCR, false);
     }
+    
     /**
      * change notes:
      * 1) convert ascii characters encoded using &#xx; format to the ascii characters -- may be an attempt to slip in malicious html
@@ -108,6 +124,25 @@ public class Utils {
      */
     public static String escapeXml(String s, boolean advanced, boolean recognizeUnicodeChars, boolean translateSpecialEntities, 
                                    boolean isDomCreation, boolean transResCharsToNCR, boolean translateSpecialEntitiesToNCR) {
+    	return escapeXml(s,advanced,recognizeUnicodeChars,translateSpecialEntities,isDomCreation,transResCharsToNCR,translateSpecialEntitiesToNCR,false);
+    }
+    
+    /**
+     * change notes:
+     * 1) convert ascii characters encoded using &#xx; format to the ascii characters -- may be an attempt to slip in malicious html
+     * 2) convert &#xxx; format characters to &quot; style representation if available for the character.
+     * 3) convert html special entities to xml &#xxx; when outputing in xml
+     * @param s
+     * @param advanced
+     * @param recognizeUnicodeChars
+     * @param translateSpecialEntities
+     * @param isDomCreation
+     * @param isHtmlOutput
+     * @return
+     * TODO Consider moving to CleanerProperties since a long list of params is misleading.
+     */
+    public static String escapeXml(String s, boolean advanced, boolean recognizeUnicodeChars, boolean translateSpecialEntities, 
+                                   boolean isDomCreation, boolean transResCharsToNCR, boolean translateSpecialEntitiesToNCR, boolean isHtmlOutput) {
         if (s != null) {
     		int len = s.length();
     		StringBuilder result = new StringBuilder(len);
@@ -128,12 +163,19 @@ public class Utils {
                                 result.append( code.getDecimalNCR() );
                             }
 							i += code.getKey().length() + 1;
-						} else if (advanced ) {
+    				    } else if (advanced ) {
 					        result.append(transResCharsToNCR ? code.getDecimalNCR() : code.getEscaped(isDomCreation));
 		                    i += code.getKey().length()+1;
 			            } else {
 			                result.append(transResCharsToNCR ? getAmpNcr() : "&amp;");
 			            }
+			        //
+			        // If the serializer used to output is HTML rather than XML, and we have a match to a
+			        // known HTML entity such as &nbsp;, we output it as-is
+			        //
+					} else if ((isHtmlOutput &&
+						(code = SpecialEntities.INSTANCE.getSpecialEntity(s.substring(i, i+Math.min(10, len-i)))) != null)){
+						result.append("&");
     				} else {
     				    result.append(transResCharsToNCR ? getAmpNcr() : "&amp;");
     				}
@@ -292,7 +334,7 @@ public class Utils {
             return true;
         }
         String s = o.toString();
-        String text = escapeXml(s, true, false, false, false, false, false);
+        String text = escapeXml(s, true, false, false, false, false, false, false);
         // TODO: doesn't escapeXml handle this?
         String last = text.replace(SpecialEntities.NON_BREAKABLE_SPACE, ' ').trim();
         return last.length() == 0;

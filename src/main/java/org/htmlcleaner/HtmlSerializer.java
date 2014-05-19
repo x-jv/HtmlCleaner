@@ -60,7 +60,7 @@ public abstract class HtmlSerializer extends Serializer {
     }
     
     protected String escapeText(String content) {
-        return Utils.escapeXml(content, props, false);
+        return Utils.escapeHtml(content, props);
     }
 
     protected void serializeOpenTag(TagNode tagNode, Writer writer, boolean newLine) throws IOException {
