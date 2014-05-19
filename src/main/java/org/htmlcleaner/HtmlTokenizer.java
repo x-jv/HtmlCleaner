@@ -343,6 +343,7 @@ public class HtmlTokenizer {
         _tokenList.clear();
         _asExpected = true;
         _isScriptContext = false;
+        _isStyleContext = false;
         _isLateForDoctype = false;
         _namespacePrefixes.clear();
 
@@ -350,6 +351,7 @@ public class HtmlTokenizer {
         readIfNeeded(0);
 
         boolean isScriptEmpty = true;
+        boolean isStyleEmpty = true;
 
         while ( !isAllRead() ) {
             // resets all the runtime values
@@ -361,54 +363,79 @@ public class HtmlTokenizer {
             readIfNeeded(10);
 
             if (_isScriptContext) {
-                if ( startsWith("</script") && (isWhitespace(_pos + 8) || isChar(_pos + 8, '>')) ) {
-                    tagEnd();
-                } else if ( isScriptEmpty && startsWith("<!--") ) {
-                    comment();
-                } else if ( startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) { 
-                	cdata();
-                } else {
-                    boolean isTokenAdded = content();
-                    if (isScriptEmpty && isTokenAdded) {
-                        final BaseToken lastToken = (BaseToken) _tokenList.get(_tokenList.size() - 1);
-                        if (lastToken != null) {
-                            final String lastTokenAsString = lastToken.toString();
-                            if (lastTokenAsString != null && lastTokenAsString.trim().length() > 0) {
-                                isScriptEmpty = false;
-                            }
-                        }
-                    }
-                }
-                if (!_isScriptContext) {
-                    isScriptEmpty = true;
-                }
-            } else {
-            	if ( startsWith("<!doctype") ) {
-            		if ( !_isLateForDoctype ) {
-            			doctype();
-            			_isLateForDoctype = true;
-            		} else {
-            			ignoreUntil('<');
-            		}
-            	} else if ( startsWith("</") && isIdentifierStartChar(_pos + 2) ) {
-            		_isLateForDoctype = true;
+            	if ( startsWith("</script") && (isWhitespace(_pos + 8) || isChar(_pos + 8, '>')) ) {
             		tagEnd();
-            	} else if ( startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) { 
-                	cdata();
-            	} else if ( startsWith("<!--") ) {
+            	} else if ( isScriptEmpty && startsWith("<!--") ) {
             		comment();
-            	} else if ( startsWith("<") && isIdentifierStartChar(_pos + 1) ) {
-            		_isLateForDoctype = true;
-            		tagStart();
-            	} else if ( props.isIgnoreQuestAndExclam() && (startsWith("<!") || startsWith("<?")) ) {
-            		ignoreUntil('<');
-            		if (isChar('>')) {
-            			go();
-            		}
-            	} else if ( startsWith("<?xml")){
-            		ignoreUntil('<');
+            	} else if ( startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) { 
+            		cdata();
             	} else {
-            		content();
+            		boolean isTokenAdded = content();
+            		if (isScriptEmpty && isTokenAdded) {
+            			final BaseToken lastToken = (BaseToken) _tokenList.get(_tokenList.size() - 1);
+            			if (lastToken != null) {
+            				final String lastTokenAsString = lastToken.toString();
+            				if (lastTokenAsString != null && lastTokenAsString.trim().length() > 0) {
+            					isScriptEmpty = false;
+            				}
+            			}
+            		}
+            	}
+            	if (!_isScriptContext) {
+            		isScriptEmpty = true;
+            	}
+            } else {
+            	if (_isStyleContext) {
+            		if ( startsWith("</style") && (isWhitespace(_pos + 7) || isChar(_pos + 7, '>')) ) {
+            			tagEnd();
+            		} else if ( isStyleEmpty && startsWith("<!--") ) {
+            			comment();
+            		} else if ( startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) { 
+            			cdata();
+            		} else {
+            			boolean isTokenAdded = content();
+            			if (isStyleEmpty && isTokenAdded) {
+            				final BaseToken lastToken = (BaseToken) _tokenList.get(_tokenList.size() - 1);
+            				if (lastToken != null) {
+            					final String lastTokenAsString = lastToken.toString();
+            					if (lastTokenAsString != null && lastTokenAsString.trim().length() > 0) {
+            						isStyleEmpty = false;
+            					}
+            				}
+            			}
+            		}
+            		if (!_isStyleContext) {
+            			isStyleEmpty = true;
+            		}
+
+            	} else {
+            		if ( startsWith("<!doctype") ) {
+            			if ( !_isLateForDoctype ) {
+            				doctype();
+            				_isLateForDoctype = true;
+            			} else {
+            				ignoreUntil('<');
+            			}
+            		} else if ( startsWith("</") && isIdentifierStartChar(_pos + 2) ) {
+            			_isLateForDoctype = true;
+            			tagEnd();
+            		} else if ( startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) { 
+            			cdata();
+            		} else if ( startsWith("<!--") ) {
+            			comment();
+            		} else if ( startsWith("<") && isIdentifierStartChar(_pos + 1) ) {
+            			_isLateForDoctype = true;
+            			tagStart();
+            		} else if ( props.isIgnoreQuestAndExclam() && (startsWith("<!") || startsWith("<?")) ) {
+            			ignoreUntil('<');
+            			if (isChar('>')) {
+            				go();
+            			}
+            		} else if ( startsWith("<?xml")){
+            			ignoreUntil('<');
+            		} else {
+            			content();
+            		}
             	}
             }
         }
