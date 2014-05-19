@@ -325,12 +325,70 @@ public class HtmlTokenizer {
 
     private boolean addSavedAsContent() {
         if (_saved.length() > 0) {
-            addToken( new ContentNode(_saved.toString()) );
+            addToken( new ContentNode(props.isDeserializeEntities() ? deserializeEntitiesInSaved() : _saved.toString()) );
             _saved.delete(0, _saved.length());
             return true;
         }
 
         return false;
+    }
+
+    private String deserializeEntitiesInSaved() {
+        SpecialEntities entities = SpecialEntities.INSTANCE;
+        int entityStart = -1;
+        boolean numericEntity = false;
+        boolean hexEntity = false;
+        int maxEntityLength = entities.getMaxEntityLength();
+        int i = 0;
+        int length = _saved.length();
+        while (i < length) {
+            if (_saved.charAt(i) == '&') {
+                entityStart = i;
+                numericEntity = false;
+                hexEntity = false;
+                ++i;
+            } else if (entityStart != -1) {
+                if (_saved.charAt(i) == ';') {
+                    SpecialEntity entity;
+                    if (numericEntity) {
+                        try {
+                            entity = entities.getSpecialEntityByUnicode(Integer.parseInt(
+                                    _saved.substring(
+                                            entityStart + (hexEntity ? 3 : 2),
+                                            i
+                                    ),
+                                    hexEntity ? 16 : 10
+                            ));
+                        } catch (NumberFormatException e) {
+                            entity = null;
+                        }
+                    } else {
+                        entity = entities.getSpecialEntity(_saved.substring(entityStart + 1, i));
+                    }
+                    if (entity != null) {
+                        char[] decodedEntity = Character.toChars(entity.intValue());
+                        _saved.replace(entityStart, i + 1, new String(decodedEntity));
+                        length = _saved.length();
+                        i = entityStart + decodedEntity.length;
+                    } else {
+                        ++i;
+                    }
+                    entityStart = -1;
+                } else {
+                    if (i == entityStart + 1 && _saved.charAt(i) == '#') {
+                        numericEntity = true;
+                    } else if (i == entityStart + 2 && numericEntity && _saved.charAt(i) == 'x') {
+                        hexEntity = true;
+                    } else if (i - entityStart > maxEntityLength) {
+                        entityStart = -1;
+                    }
+                    ++i;
+                }
+            } else {
+                ++i;
+            }
+        }
+        return _saved.toString();
     }
 
     /**

@@ -83,6 +83,7 @@ public class CleanerProperties implements HtmlModificationListener{
     private boolean namespacesAware;
     private boolean transSpecialEntitiesToNCR;
     private boolean omitCdataOutsideScriptAndStyle;
+    private boolean deserializeEntities;
 
     /**
      * "cause the cleaner cannot keep track of whitespace at that level",
@@ -325,6 +326,14 @@ public class CleanerProperties implements HtmlModificationListener{
     }
     public void setOmitCdataOutsideScriptAndStyle(boolean value){
     	omitCdataOutsideScriptAndStyle = value;
+    }
+
+    public boolean isDeserializeEntities() {
+        return deserializeEntities;
+    }
+
+    public void setDeserializeEntities(boolean deserializeEntities) {
+        this.deserializeEntities = deserializeEntities;
     }
 
     /**
