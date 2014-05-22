@@ -1,4 +1,4 @@
-/*  Copyright (c) 2006-2013, the HtmlCleaner Project
+/*  Copyright (c) 2006-2014, the HtmlCleaner Project
     All rights reserved.
 
     Redistribution and use of this software in source and binary forms,
@@ -32,9 +32,11 @@
 */
 package org.htmlcleaner;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.io.StringWriter;
 
 import org.junit.Test;
 
@@ -53,6 +55,22 @@ public class SpecialEntitiesTest extends AbstractHtmlCleanerTest {
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
+	}
+	
+	/*
+	 * Check that we don't convert HTML entities like &nbsp; when outputting using a HTML serializer - see bug #118
+	 */
+	@Test
+	public void htmlEntities()  throws IOException{
+		String input = "<html><head></head><body><p>&nbsp;&pound;</p></body></html>";
+		cleaner.getProperties().setAdvancedXmlEscape(false);
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+		
+		TagNode cleaned = cleaner.clean(input);
+		Serializer ser = new SimpleHtmlSerializer(cleaner.getProperties());
+		StringWriter writer = new StringWriter();
+		ser.serialize(cleaned, writer);
+		assertEquals(input, writer.toString());
 	}
 
 }
