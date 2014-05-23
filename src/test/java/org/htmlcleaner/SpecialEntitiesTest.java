@@ -63,7 +63,8 @@ public class SpecialEntitiesTest extends AbstractHtmlCleanerTest {
 	@Test
 	public void htmlEntities()  throws IOException{
 		String input = "<html><head></head><body><p>&nbsp;&pound;</p></body></html>";
-		cleaner.getProperties().setAdvancedXmlEscape(false);
+		cleaner.getProperties().setAdvancedXmlEscape(true);
+		cleaner.getProperties().setTranslateSpecialEntities(false);
 		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
 		
 		TagNode cleaned = cleaner.clean(input);
@@ -71,6 +72,17 @@ public class SpecialEntitiesTest extends AbstractHtmlCleanerTest {
 		StringWriter writer = new StringWriter();
 		ser.serialize(cleaned, writer);
 		assertEquals(input, writer.toString());
+		
+		//
+		// Try now with AdvancdXmlEscape set to false
+		//
+		cleaner.getProperties().setAdvancedXmlEscape(false);
+		cleaned = cleaner.clean(input);
+		ser = new SimpleHtmlSerializer(cleaner.getProperties());
+		writer = new StringWriter();
+		ser.serialize(cleaned, writer);
+		assertEquals(input, writer.toString());
+		
 	}
 
 }

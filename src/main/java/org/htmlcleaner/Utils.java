@@ -164,14 +164,18 @@ public class Utils {
                             }
 							i += code.getKey().length() + 1;
     				    } else if (advanced ) {
-					        result.append(transResCharsToNCR ? code.getDecimalNCR() : code.getEscaped(isDomCreation));
+    				    	//
+    				    	// If we are creating a HTML DOM or outputting to the HtmlSerializer, use HTML special entities;
+    				    	// otherwise we get their XML escaped version (see bug #118).
+    				    	//
+					        result.append(transResCharsToNCR ? code.getDecimalNCR() : code.getEscaped(isHtmlOutput || isDomCreation));
 		                    i += code.getKey().length()+1;
 			            } else {
 			                result.append(transResCharsToNCR ? getAmpNcr() : "&amp;");
 			            }
 			        //
 			        // If the serializer used to output is HTML rather than XML, and we have a match to a
-			        // known HTML entity such as &nbsp;, we output it as-is
+			        // known HTML entity such as &nbsp;, we output it as-is (see bug #118)
 			        //
 					} else if ((isHtmlOutput &&
 						(code = SpecialEntities.INSTANCE.getSpecialEntity(s.substring(i, i+Math.min(10, len-i)))) != null)){
