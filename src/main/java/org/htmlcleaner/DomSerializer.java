@@ -98,6 +98,10 @@ public class DomSerializer {
         	String publicId = rootNode.getDocType().getPublicId();
         	String systemId = rootNode.getDocType().getSystemId();
             DocumentType documentType = impl.createDocumentType(qualifiedName, publicId, systemId);
+            //
+            // While the qualfiied name is "HTML" for some DocTypes, we want the actual document root name to be "html". See bug #116
+            //
+            if (qualifiedName.equals("HTML")) qualifiedName = "html";
             document = impl.createDocument(rootNode.getNamespaceURIOnPath(""), qualifiedName, documentType);
         } else {
         	document = builder.newDocument();

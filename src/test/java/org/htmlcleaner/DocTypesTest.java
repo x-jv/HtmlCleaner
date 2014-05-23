@@ -385,6 +385,17 @@ public class DocTypesTest {
 	}
 	
 	@Test
+	public void html_4_01_domserialize() throws IOException, ParserConfigurationException{
+		TagNode cleaned = cleaner.clean("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"><html><body></body></html>");
+		DomSerializer domSerializer = new DomSerializer(cleaner.getProperties());
+		Document doc = domSerializer.createDOM(cleaned);
+		assertEquals("html", doc.getDocumentElement().getNodeName());
+        assertEquals("HTML", doc.getDoctype().getName());
+        assertEquals("-//W3C//DTD HTML 4.01//EN", doc.getDoctype().getPublicId());	
+        assertEquals("http://www.w3.org/TR/html4/strict.dtd", doc.getDoctype().getSystemId());	
+	}
+	
+	@Test
 	public void html_4_01_case_correct() throws IOException{
 		TagNode cleaned = cleaner.clean("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"><html><body></body></html>");
 		String output = serializer.getAsString(cleaned);
