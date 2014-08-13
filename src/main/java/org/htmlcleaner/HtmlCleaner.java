@@ -643,11 +643,12 @@ public class HtmlCleaner {
      */
     private boolean isAllowedAsForeignMarkup(String tagname, CleanTimeValues cleanTimeValues){
     	if (!properties.isNamespacesAware()) return false;
+    	if (tagname == null) return false;
     	if (tagname.contains(":")) return true;
     	if (cleanTimeValues.namespace == null || cleanTimeValues.namespace.size() == 0) return false;
     	String ns = cleanTimeValues.namespace.peek();
     	if (ns == null) return false;
-    	if (ns.equals("http://www.w3.org/1999/xhtml")) return false;
+    	if (ns.equals("http://www.w3.org/1999/xhtml") || ns.equals("http://w3.org/1999/xhtml")) return false;
     	return true;
     }
 
