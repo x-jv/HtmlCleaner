@@ -133,8 +133,10 @@ public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
     public void testOOME_59() throws Exception {
         String in = "<html><body><table><fieldset><legend>";
         CleanerProperties cp = new CleanerProperties();
+        cp.setOmitUnknownTags(true);
         HtmlCleaner c = new HtmlCleaner(cp);
         TagNode root = c.clean(in);
+        assertEquals(1, root.getElementsByName("legend", true).length);
     }
     
     /**

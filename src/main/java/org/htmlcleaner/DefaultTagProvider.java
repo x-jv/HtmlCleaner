@@ -514,6 +514,14 @@ public class DefaultTagProvider implements ITagInfoProvider {
 
         tagInfo = new TagInfo("label", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.inline);
         this.put("label", tagInfo);
+        
+        tagInfo = new TagInfo("legend", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
+        //
+        // If we include this rule, we get an out-of-memory error. See issue 129.
+        //
+        //tagInfo.defineRequiredEnclosingTags("fieldset");
+        tagInfo.defineAllowedChildrenTags(PHRASING_TAGS);
+        this.put("legend", tagInfo);
 
         tagInfo = new TagInfo("fieldset", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
         tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
