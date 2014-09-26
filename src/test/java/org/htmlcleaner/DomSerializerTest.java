@@ -90,6 +90,27 @@ public class DomSerializerTest extends AbstractHtmlCleanerTest {
     	assertNotNull(dom.getChildNodes().item(0).getChildNodes().item(0));
     	assertEquals("head", dom.getChildNodes().item(0).getChildNodes().item(0).getNodeName());
     }
+    
+	/**
+	 * See issue 127
+	 * @throws IOException
+	 */
+    @Test
+    public void rootNodeAttributes() throws Exception{
+    	cleaner.getProperties().setUseCdataForScriptAndStyle(true);
+    	cleaner.getProperties().setOmitCdataOutsideScriptAndStyle(true);
+    	String initial = readFile("src/test/resources/test29.html");
+    	TagNode tagNode = cleaner.clean(initial);
+    	DomSerializer ser = new DomSerializer(cleaner.getProperties());
+    	Document dom = ser.createDOM(tagNode);
+    	assertNotNull(dom.getChildNodes().item(0).getChildNodes().item(0));
+    	assertEquals("http://unknown.namespace.com", dom.getChildNodes().item(0).getAttributes().getNamedItem("xmlns").getNodeValue());
+    	assertEquals("27", dom.getChildNodes().item(0).getAttributes().getNamedItem("id").getNodeValue());
+    	//
+    	// Check we have a real ID attribute in the DOM and not just a regular attribute
+    	//
+    	assertEquals("http://unknown.namespace.com", dom.getElementById("27").getAttribute("xmlns"));
+    }
 
   
 	

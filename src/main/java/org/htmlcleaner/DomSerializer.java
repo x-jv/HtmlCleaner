@@ -108,6 +108,30 @@ public class DomSerializer {
         	Element rootElement = document.createElement(rootNode.getName());
         	document.appendChild(rootElement);
         }
+        
+        //
+        // Copy across root node attributes - see issue 127. Thanks to rasifiel for the patch
+        //
+        Map<String, String> attributes =  rootNode.getAttributes();
+        Iterator<Map.Entry<String, String>> entryIterator = attributes.entrySet().iterator();
+        while (entryIterator.hasNext()) {
+            Map.Entry<String, String> entry = entryIterator.next();
+            String attrName = entry.getKey();
+            String attrValue = entry.getValue();
+            if (escapeXml) {
+                attrValue = Utils.escapeXml(attrValue, props, true);
+            }
+
+            document.getDocumentElement().setAttribute(attrName, attrValue);
+
+            //
+            // Flag the attribute as an ID attribute if appropriate. Thanks to Chris173
+            //
+            if (attrName.equalsIgnoreCase("id")) {
+                document.getDocumentElement().setIdAttribute(attrName, true);
+            }
+
+        }
 
         createSubnodes(document, (Element)document.getDocumentElement(), rootNode.getAllChildren());
 
