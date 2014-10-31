@@ -623,7 +623,7 @@ public class DefaultTagProvider implements ITagInfoProvider {
      * @param key
      * @param tagInfo
      */
-    private void put(String tagName, TagInfo tagInfo) {
+    protected void put(String tagName, TagInfo tagInfo) {
         this.tagInfoMap.put(tagName, tagInfo);
     }
 
