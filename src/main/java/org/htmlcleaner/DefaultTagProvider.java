@@ -172,12 +172,18 @@ public class DefaultTagProvider implements ITagInfoProvider {
         this.put("ruby", tagInfo);
         
         tagInfo = new TagInfo("rt", ContentType.text, BelongsTo.BODY, false, false, false, CloseTag.optional, Display.inline);
-        tagInfo.defineRequiredEnclosingTags("ruby");
+        //
+        // If we include this rule, we get an out-of-memory error. See issue 126.
+        //
+        //tagInfo.defineRequiredEnclosingTags("ruby");
         tagInfo.defineAllowedChildrenTags(PHRASING_TAGS);
         this.put("rt", tagInfo);
         
         tagInfo = new TagInfo("rp", ContentType.text, BelongsTo.BODY, false, false, false, CloseTag.optional, Display.inline);
-        tagInfo.defineRequiredEnclosingTags("ruby");
+        //
+        // If we include this rule, we get an out-of-memory error. See issue 126.
+        //
+        //tagInfo.defineRequiredEnclosingTags("ruby");
         tagInfo.defineAllowedChildrenTags(PHRASING_TAGS);
         this.put("rp", tagInfo);
         
