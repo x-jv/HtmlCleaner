@@ -441,7 +441,7 @@ public class TagNode extends TagToken implements HtmlNode {
      *
      * @param newChildren
      */
-    public void addChildren(List<? extends BaseToken> newChildren) {
+    public void addChildren(List newChildren) {
         if (newChildren != null) {
             for (Object child: newChildren) {
                 addChild(child);
