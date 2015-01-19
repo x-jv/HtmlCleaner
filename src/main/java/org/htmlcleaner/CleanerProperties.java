@@ -84,6 +84,7 @@ public class CleanerProperties implements HtmlModificationListener{
     private boolean transSpecialEntitiesToNCR;
     private boolean omitCdataOutsideScriptAndStyle;
     private boolean deserializeEntities;
+    private boolean trimAttributeValues;
 
     /**
      * "cause the cleaner cannot keep track of whitespace at that level",
@@ -336,6 +337,14 @@ public class CleanerProperties implements HtmlModificationListener{
         this.deserializeEntities = deserializeEntities;
     }
 
+    public boolean isTrimAttributeValues() {
+        return trimAttributeValues;
+    }
+
+    public void setTrimAttributeValues(boolean trimAttributeValues) {
+        this.trimAttributeValues = trimAttributeValues;
+    }
+
     /**
      * Resets prune tags set and adds tag name conditions to it.
      * All the tags listed by pruneTags param are added.
@@ -455,6 +464,7 @@ public class CleanerProperties implements HtmlModificationListener{
      * booleanAttributeValues = BOOL_ATT_SELF;
      * collapseNullHtml = CollapseHtml.none
      * charset = "UTF-8";
+     * trimAttributeValues = true;
      */
     public void reset() {
         advancedXmlEscape = true;
@@ -486,6 +496,7 @@ public class CleanerProperties implements HtmlModificationListener{
         tagInfoProvider = DefaultTagProvider.INSTANCE;
         htmlModificationListeners = new ArrayList < HtmlModificationListener >();
         omitCdataOutsideScriptAndStyle = false;
+        trimAttributeValues = true;
     }
 
     private void resetPruneTagSet() {

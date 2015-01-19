@@ -538,6 +538,7 @@ public class HtmlTokenizer {
         }
 
         TagNode tagNode = new TagNode(tagName);
+        tagNode.setTrimAttributeValues(props.isTrimAttributeValues());
         _currentTagToken = tagNode;
 
         if (_asExpected) {

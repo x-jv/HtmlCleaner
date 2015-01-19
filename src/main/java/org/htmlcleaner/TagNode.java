@@ -90,6 +90,11 @@ public class TagNode extends TagToken implements HtmlNode {
     private boolean foreignMarkupFlagSet = false;
 
     /**
+     * This flag is set if attribute values should be trimmed.
+     */
+    private boolean isTrimAttributeValues = true;
+    
+    /**
      * Indicates that the node was marked to be pruned out of the tree.
      */
     private boolean pruned;
@@ -255,7 +260,8 @@ public class TagNode extends TagToken implements HtmlNode {
         if (attName != null) {
             String trim = attName.trim();
             if (!isForeignMarkup && foreignMarkupFlagSet) trim = trim.toLowerCase();
-            String value = attValue == null ? "" : attValue.trim().replaceAll("\\p{Cntrl}", " ");
+            String value = attValue == null ? "" : attValue;
+            if (isTrimAttributeValues) value = value.trim().replaceAll("\\p{Cntrl}", " ");
             if (trim.length() != 0) {
                 attributes.put(trim, value);
             }
@@ -828,6 +834,20 @@ public class TagNode extends TagToken implements HtmlNode {
 		if (!isForeignMarkup){
 			this.replaceAttributes(getAttributesInLowerCase());
 		}
+	}
+
+	/**
+	 * @return the isTrimAttributeValues
+	 */
+	public boolean isTrimAttributeValues() {
+		return isTrimAttributeValues;
+	}
+
+	/**
+	 * @param isTrimAttributeValues the isTrimAttributeValues to set
+	 */ 
+	public void setTrimAttributeValues(boolean isTrimAttributeValues) {
+		this.isTrimAttributeValues = isTrimAttributeValues;
 	}
 	
 	/**
