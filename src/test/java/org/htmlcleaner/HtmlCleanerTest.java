@@ -9,6 +9,16 @@ import org.junit.Test;
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
 	
 	/**
+	 * This is to test issue #132
+	 * @throws IOException 
+	 */
+	@Test
+	public void classCastTest() throws IOException{
+		String initial = readFile("src/test/resources/test30.html");
+		TagNode node = cleaner.clean(initial);
+	}
+	
+	/**
 	 * This is to test issue #93
 	 */
 	@Test
