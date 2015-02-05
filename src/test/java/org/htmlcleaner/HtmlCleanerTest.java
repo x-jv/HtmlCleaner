@@ -9,6 +9,20 @@ import org.junit.Test;
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
 	
 	/**
+	 * This is to test that we don't get an NPE with a malformed HTTPS XHTML namespace. See issue #133
+	 */
+	@Test
+	public void testNPEWithHttpsNamespace(){
+		String initial="<html xmlns=\"https://www.w3.org/1999/xhtml\"><head></head><body><SPAN><BR></SPAN><EM></EM></body></html>";
+		String expected="<html xmlns=\"http://www.w3.org/1999/xhtml\"><head /><body><span><br /></span><em></em></body></html>";
+		cleaner.getProperties().setNamespacesAware(true);
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);		
+	}
+	
+	/**
 	 * This is to test issue #132
 	 * @throws IOException 
 	 */

@@ -648,7 +648,7 @@ public class HtmlCleaner {
     	if (cleanTimeValues.namespace == null || cleanTimeValues.namespace.size() == 0) return false;
     	String ns = cleanTimeValues.namespace.peek();
     	if (ns == null) return false;
-    	if (ns.equals("http://www.w3.org/1999/xhtml") || ns.equals("http://w3.org/1999/xhtml")) return false;
+    	if (ns.equals("http://www.w3.org/1999/xhtml")) return false;
     	return true;
     }
 
@@ -776,6 +776,16 @@ public class HtmlCleaner {
                 if (startTagToken.hasAttribute("xmlns")){
                 	
                 	String ns = startTagToken.getAttributeByName("xmlns");
+                	
+                	//
+                	// Fix common misspellings of the XHTML namespace
+                	//
+                	if (ns.equals("https://www.w3.org/1999/xhtml") || ns.equals("http://w3.org/1999/xhtml")){
+                		ns = "http://www.w3.org/1999/xhtml";
+                		Map<String, String> attributes = startTagToken.getAttributes();
+                		attributes.put("xmlns", "http://www.w3.org/1999/xhtml");
+                		startTagToken.setAttributes(attributes);
+                	}
                 	
                 	//
                 	// If this is the HTML tag, and the namespace is the legacy HTML NS, remove the
