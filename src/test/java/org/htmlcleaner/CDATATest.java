@@ -41,6 +41,17 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class CDATATest extends AbstractHtmlCleanerTest {
+	
+	
+	/**
+	 * This is to test issue #134
+	 * @throws IOException 
+	 */
+	@Test
+	public void strayEndTagInCDATA() throws IOException{
+		String initial = readFile("src/test/resources/test31.html");
+		cleaner.clean(initial);
+	}
 
 	/**
 	 * Tests that we escape CDATA in regular HTML content

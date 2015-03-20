@@ -687,10 +687,12 @@ public class HtmlCleaner {
                     	//
                     	// Get the open start tag. If it contained an xmlns, then we remove it from the current namespace stack
                     	//
-                    	TagNode startingTag = (TagNode) closed.get(0);
-                    	if (startingTag.hasAttribute("xmlns")){
-                    		cleanTimeValues.namespace.pop();
-                    	}
+                        if (closed.size()>0){
+                    	  TagNode startingTag = (TagNode) closed.get(0);
+                    	  if (startingTag.hasAttribute("xmlns")){
+                    		  cleanTimeValues.namespace.pop();
+                    	  }
+                        }
                     	
                         nodeIterator.set(null);
                         for (int i = closed.size() - 1; i >= 0; i--) {
