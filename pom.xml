@@ -153,6 +153,9 @@
                       <goals>
                         <goal>jar</goal>
                       </goals>
+	  	              <configuration>
+	  	                <additionalparam>-Xdoclint:none</additionalparam>
+	  	              </configuration>
                     </execution>
                   </executions>
             </plugin>
@@ -169,7 +172,7 @@
                         </goals>
                         <!-- only required when scott is doing the release! -->
                         <configuration> 
-                            <keyname>98654FBE</keyname> 
+                            <keyname>11D7C9D5</keyname> 
                         </configuration> 
                     </execution>
                 </executions>
