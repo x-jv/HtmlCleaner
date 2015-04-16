@@ -140,7 +140,7 @@ public class TagNode extends TagToken implements HtmlNode {
     	//
     	// We have to do case-insensitive comparisons
     	//	
-        return attName != null ? (String) attributes.get(attName.toLowerCase()) : null;
+        return attName != null ? (String) getAttributesInLowerCase().get(attName.toLowerCase()) : null;
     }
 
     /**

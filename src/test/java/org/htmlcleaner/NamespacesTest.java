@@ -39,6 +39,18 @@ import org.junit.Test;
 
 public class NamespacesTest  extends AbstractHtmlCleanerTest{
 
+	
+	/**
+	 * Tests that we can handle XMLNS="" attributes. See issue #135
+	 * @throws IOException
+	 */
+	@Test
+	public void xmlnsAttributeInUpperCase() throws IOException{
+		String initial = "<BANANA XMLNS=\"BANANA\"/>";
+		String expected = "<html>\n<head />\n<body><BANANA XMLNS=\"BANANA\" /></body></html>";
+		assertCleaned(initial, expected);
+	}
+	
 	/**
 	 * Tests that we can handle xmlns="" attributes. See issue #135
 	 * @throws IOException
