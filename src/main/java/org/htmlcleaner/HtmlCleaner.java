@@ -625,7 +625,7 @@ public class HtmlCleaner {
         TagPos rubbishPos = getOpenTags(cleanTimeValues).findTagToPlaceRubbish();
         if (rubbishPos != null) {
     		TagNode startTagToken = (TagNode) nodeList.get(rubbishPos.position);
-            startTagToken.addItemForMoving(tokenToAdd);
+			startTagToken.addItemForMoving(tokenToAdd);
         }
     }
 
@@ -796,8 +796,15 @@ public class HtmlCleaner {
                 	if ( "html".equals(tagName) && ns.equals("http://www.w3.org/TR/REC-html40")) {
                 		startTagToken.removeAttribute("xmlns");
                 	} else {
-                		cleanTimeValues.namespace.push(ns);
-                		startTagToken.addNamespaceDeclaration("", ns);
+                		//
+                		// Remove any empty xmlns attributes
+                		//
+                		if (ns.trim().isEmpty()){
+                			startTagToken.removeAttribute("xmlns");
+                		} else {
+                			cleanTimeValues.namespace.push(ns);
+                			startTagToken.addNamespaceDeclaration("", ns);
+                		}
                 	}
                 }
                 

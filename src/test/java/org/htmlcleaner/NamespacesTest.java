@@ -40,6 +40,17 @@ import org.junit.Test;
 public class NamespacesTest  extends AbstractHtmlCleanerTest{
 
 	/**
+	 * Tests that we can handle xmlns="" attributes. See issue #135
+	 * @throws IOException
+	 */
+	@Test
+	public void emptyNamespaces() throws IOException{
+		String initial = readFile("src/test/resources/test32.html");
+		String expected = "<html>\n<head />\n<body><a href=\"link.html\"><img /></a><p>Text</p></body></html>";
+		assertCleaned(initial, expected);
+	}
+	
+	/**
 	 * Uses an RDFa example to test that we retain namespace declarations. See issue #63
 	 * @throws IOException
 	 */
