@@ -326,7 +326,18 @@ public class HtmlCleaner {
 	 */
 	public HtmlCleaner(ITagInfoProvider tagInfoProvider, CleanerProperties properties) {
         this.properties = properties == null ? new CleanerProperties() : properties;
-        this.properties.setTagInfoProvider(tagInfoProvider == null ? DefaultTagProvider.INSTANCE : tagInfoProvider);
+        //
+        // If the given tagInfoProvider is null, then we set it to the default
+        // UNLESS the TagInfoProvider has already been set in cleanerProperties.
+        // in which case we leave properties as they are.
+        //
+        if (tagInfoProvider == null && this.properties.getTagInfoProvider() == null){
+        	 this.properties.setTagInfoProvider(DefaultTagProvider.INSTANCE);
+        } else {
+        	if (tagInfoProvider != null){
+        	   this.properties.setTagInfoProvider(tagInfoProvider == null ? DefaultTagProvider.INSTANCE : tagInfoProvider);
+        	}
+        }
 	}
 
     public TagNode clean(String htmlContent) {

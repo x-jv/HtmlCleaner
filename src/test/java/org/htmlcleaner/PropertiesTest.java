@@ -12,6 +12,38 @@ import junit.framework.TestCase;
  * @author Eugene Sapozhnikov (blackorangebox@gmail.com)
  */
 public class PropertiesTest extends TestCase {
+	
+	/**
+	 * Test behavour of creating a new cleaner with properties including
+	 * tag provider set
+	 * @throws Exception
+	 */
+	public void initialiseCleanerWithProperties() throws Exception {
+		CleanerProperties properties = new CleanerProperties();
+		properties.setTagInfoProvider(Html5TagProvider.INSTANCE);
+		HtmlCleaner cleaner = new HtmlCleaner(properties);
+		assertTrue(cleaner.getTagInfoProvider() instanceof Html5TagProvider);
+		
+		properties = new CleanerProperties();
+		properties.setTagInfoProvider(null);
+		cleaner = new HtmlCleaner(properties);
+		assertTrue(cleaner.getTagInfoProvider() instanceof DefaultTagProvider);
+		
+		properties = new CleanerProperties();
+		properties.setTagInfoProvider(null);
+		cleaner = new HtmlCleaner(null,properties);
+		assertTrue(cleaner.getTagInfoProvider() instanceof DefaultTagProvider);
+		
+		properties = new CleanerProperties();
+		properties.setTagInfoProvider(null);
+		cleaner = new HtmlCleaner(Html5TagProvider.INSTANCE, properties);
+		assertTrue(cleaner.getTagInfoProvider() instanceof Html5TagProvider);
+		
+		properties = new CleanerProperties();
+		properties.setTagInfoProvider(DefaultTagProvider.INSTANCE);
+		cleaner = new HtmlCleaner(Html5TagProvider.INSTANCE, properties);
+		assertTrue(cleaner.getTagInfoProvider() instanceof Html5TagProvider);
+	}
 
     public void testPropertiesAdvancedXmlEscape() throws Exception {
         HtmlCleaner cleaner = new HtmlCleaner();
