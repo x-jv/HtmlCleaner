@@ -1,5 +1,4 @@
 package org.htmlcleaner;
-import test.resources.images.*;
 
 /**  Copyright (c) 2013, Marton Szeles
     All rights reserved.
