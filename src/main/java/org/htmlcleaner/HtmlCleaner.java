@@ -100,11 +100,16 @@ import org.htmlcleaner.conditional.ITagNodeCondition;
  */
 public class HtmlCleaner {
 
+	
     /**
      * Marker attribute added to aid with part of the cleaning process.
      * TODO: a non-intrusive way of doing this that does not involve modifying the source html
      */
     private static final String MARKER_ATTRIBUTE = "htmlcleaner_marker";
+    
+    public static int HTML_4=4;
+    public static int HTML_5=5;
+ 
     
     /**
      * Contains information about single open tag
@@ -295,9 +300,14 @@ public class HtmlCleaner {
     private CleanerProperties properties;
 
     private CleanerTransformations transformations;
-
+    
     /**
-     * Constructor - creates cleaner instance with default tag info provider and default properties.
+     * Constructor - creates cleaner instance with default tag info provider,default html version 5
+     *  and default properties.
+     */
+   
+    /**
+     * Constructor - creates cleaner instance with default tag info provider,default version and default properties.
      */
     public HtmlCleaner() {
         this(null, null);
@@ -310,6 +320,8 @@ public class HtmlCleaner {
     public HtmlCleaner(ITagInfoProvider tagInfoProvider) {
         this(tagInfoProvider, null);
     }
+    
+    
 
     /**
      * Constructor - creates the instance with default tag info provider and specified properties
@@ -318,6 +330,8 @@ public class HtmlCleaner {
     public HtmlCleaner(CleanerProperties properties) {
         this(null, properties);
     }
+    
+   
 
     /**
 	 * Constructor - creates the instance with specified tag info provider and specified properties
@@ -325,19 +339,22 @@ public class HtmlCleaner {
 	 * @param properties Properties used during parsing and serializing
 	 */
 	public HtmlCleaner(ITagInfoProvider tagInfoProvider, CleanerProperties properties) {
-        this.properties = properties == null ? new CleanerProperties() : properties;
-        //
-        // If the given tagInfoProvider is null, then we set it to the default
-        // UNLESS the TagInfoProvider has already been set in cleanerProperties.
-        // in which case we leave properties as they are.
-        //
-        if (tagInfoProvider == null && this.properties.getTagInfoProvider() == null){
-        	 this.properties.setTagInfoProvider(DefaultTagProvider.INSTANCE);
-        } else {
-        	if (tagInfoProvider != null){
-        	   this.properties.setTagInfoProvider(tagInfoProvider == null ? DefaultTagProvider.INSTANCE : tagInfoProvider);
-        	}
-        }
+		 this.properties = properties == null ? new CleanerProperties() : properties;
+	        //
+	        // If the given tagInfoProvider is null, then we set it to the default
+	        // UNLESS the TagInfoProvider has already been set in cleanerProperties.
+	        // in which case we leave properties as they are.
+	        //
+	        if (tagInfoProvider == null && this.properties.getTagInfoProvider() == null){
+	        	if (this.properties.getHtmlVersion()==HTML_4)
+	        		this.properties.setTagInfoProvider(Html4TagProvider.INSTANCE);
+	        	else
+	        		this.properties.setTagInfoProvider(Html5TagProvider.INSTANCE);
+	        } else {
+	        	if (tagInfoProvider != null){
+	        	   this.properties.setTagInfoProvider(tagInfoProvider == null ? Html4TagProvider.INSTANCE : tagInfoProvider);
+	        	}
+	        }
 	}
 
     public TagNode clean(String htmlContent) {
@@ -699,10 +716,10 @@ public class HtmlCleaner {
                     	// Get the open start tag. If it contained an xmlns, then we remove it from the current namespace stack
                     	//
                         if (closed.size()>0){
-                    	  TagNode startingTag = (TagNode) closed.get(0);
-                    	  if (startingTag.hasAttribute("xmlns")){
-                    		  cleanTimeValues.namespace.pop();
-                    	  }
+                      	  TagNode startingTag = (TagNode) closed.get(0);
+                      	  if (startingTag.hasAttribute("xmlns")){
+                      		  cleanTimeValues.namespace.pop();
+                      	  }
                         }
                     	
                         nodeIterator.set(null);

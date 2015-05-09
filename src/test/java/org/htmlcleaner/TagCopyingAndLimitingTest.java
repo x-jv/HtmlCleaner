@@ -49,15 +49,15 @@ import junit.framework.TestCase;
  */
 public class TagCopyingAndLimitingTest extends TestCase {
 
-    public void testTagCopyingAndLimiting() throws IOException, ParserConfigurationException {
-
-        StringBuilder sb = new StringBuilder();
+    public void testTagCopyingAndLimitingHTML4() throws IOException, ParserConfigurationException {
+    	StringBuilder sb = new StringBuilder();
         sb.append("<ul>");
         for (int i = 1; i <= 10; i++) {
             sb.append("<li><font>Item ").append(i).append("</font><font size=1>");
         }
         HtmlCleaner cleaner = new HtmlCleaner();
         cleaner.getProperties().setOmitXmlDeclaration(true);
+        cleaner.getProperties().setHtmlVersion(HtmlCleaner.HTML_4); //Run with Html4TagProvider
         TagNode cleanedNode = cleaner.clean(new StringReader(sb.toString()));
 
         TagNode expectedNode = new TagNode("html");
@@ -89,6 +89,51 @@ public class TagCopyingAndLimitingTest extends TestCase {
         String expectedOutput = getOutput(expectedNode, cleaner.getProperties());
         assertEquals(expectedOutput, cleanedOutput);
     }
+    
+    //Testing with tag <b>
+    public void testTagCopyingAndLimitingHTML5() throws IOException, ParserConfigurationException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<ul>");
+        for (int i = 1; i <= 10; i++) {
+            sb.append("<li><b>Item ").append(i).append("</b><b size=1>");
+        }
+        HtmlCleaner cleaner = new HtmlCleaner();
+        cleaner.getProperties().setOmitXmlDeclaration(true);
+        cleaner.getProperties().setHtmlVersion(HtmlCleaner.HTML_5); //Run with Html5TagProvider
+        TagNode cleanedNode = cleaner.clean(new StringReader(sb.toString()));
+
+        TagNode expectedNode = new TagNode("html");
+        expectedNode.addChild(new TagNode("head"));
+        TagNode bodyNode = new TagNode("body");
+        expectedNode.addChild(bodyNode);
+        TagNode listNode = new TagNode("ul");
+        bodyNode.addChild(listNode);
+        for (int i = 1; i <= 10; i++) {
+            TagNode itemTag = new TagNode("li");
+            listNode.addChild(itemTag);
+            TagNode lastTag = itemTag;
+            int fontTagsToAdd = Math.min(i - 1, 3); // mimic the limit added for the number of times identical tokens can be copied
+            for (int n = 0; n < fontTagsToAdd; n++) {
+                TagNode fontTag = new TagNode("b");
+                fontTag.addAttribute("size", "1");
+                lastTag.addChild(fontTag);
+                lastTag = fontTag;
+            }
+            TagNode itemFontTag = new TagNode("b");
+            itemFontTag.addChild(new ContentNode("Item " + i));
+            lastTag.addChild(itemFontTag);
+            TagNode fontTag = new TagNode("b");
+            fontTag.addAttribute("size", "1");
+            lastTag.addChild(fontTag);
+        }
+
+        String cleanedOutput = getOutput(cleanedNode, cleaner.getProperties());
+        String expectedOutput = getOutput(expectedNode, cleaner.getProperties());
+        System.out.print(cleanedOutput);
+        assertEquals(expectedOutput, cleanedOutput);
+    }
+    
+    
 
     private static String getOutput(TagNode node, CleanerProperties properties) throws IOException {
         Document jdom = new JDomSerializer(properties).createJDom(node);

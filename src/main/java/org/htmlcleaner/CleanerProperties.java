@@ -85,6 +85,7 @@ public class CleanerProperties implements HtmlModificationListener{
     private boolean omitCdataOutsideScriptAndStyle;
     private boolean deserializeEntities;
     private boolean trimAttributeValues;
+    private int htmlVersion;
 
     /**
      * "cause the cleaner cannot keep track of whitespace at that level",
@@ -336,6 +337,27 @@ public class CleanerProperties implements HtmlModificationListener{
     public void setDeserializeEntities(boolean deserializeEntities) {
         this.deserializeEntities = deserializeEntities;
     }
+    /**
+     * Sets the html version according to the parameter.Also,it sets the
+     * tag provider to the appropriate version.
+     * 
+     * @param version Number 4 for html4 or 5 for html5
+     */
+    public void setHtmlVersion(int version){
+    	this.htmlVersion=version;
+    	if (version==4)
+    		this.setTagInfoProvider(Html4TagProvider.INSTANCE);
+    	else
+    		this.setTagInfoProvider(Html5TagProvider.INSTANCE);
+    }
+    
+    /**
+     * Return the html version
+     * @return int The html version
+     */
+    public int getHtmlVersion (){
+    	return this.htmlVersion;
+    }
 
     public boolean isTrimAttributeValues() {
         return trimAttributeValues;
@@ -344,7 +366,7 @@ public class CleanerProperties implements HtmlModificationListener{
     public void setTrimAttributeValues(boolean trimAttributeValues) {
         this.trimAttributeValues = trimAttributeValues;
     }
-
+    
     /**
      * Resets prune tags set and adds tag name conditions to it.
      * All the tags listed by pruneTags param are added.
@@ -465,6 +487,7 @@ public class CleanerProperties implements HtmlModificationListener{
      * collapseNullHtml = CollapseHtml.none
      * charset = "UTF-8";
      * trimAttributeValues = true;
+     * tagInfoProvider = HTML5TagProvider.INSTANCE
      */
     public void reset() {
         advancedXmlEscape = true;
@@ -493,7 +516,12 @@ public class CleanerProperties implements HtmlModificationListener{
         charset = "UTF-8";
         cleanerTransformations.clear();
         resetPruneTagSet();
-        tagInfoProvider = DefaultTagProvider.INSTANCE;
+        if (this.getHtmlVersion()==HtmlCleaner.HTML_4){
+        	tagInfoProvider = Html4TagProvider.INSTANCE;
+        }
+        else{
+        	tagInfoProvider = Html5TagProvider.INSTANCE;
+        }
         htmlModificationListeners = new ArrayList < HtmlModificationListener >();
         omitCdataOutsideScriptAndStyle = false;
         trimAttributeValues = true;

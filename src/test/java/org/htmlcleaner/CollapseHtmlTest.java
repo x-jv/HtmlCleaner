@@ -144,8 +144,10 @@ public class CollapseHtmlTest extends TestCase {
      * make sure that intervening empty elements still cause unneeded <br>
      * s to be eliminated.
      */
-    public void testCollapseInsignificantBrWithEmptyElements() throws IOException {
-        TagNode collapsed = cleaner.clean("<p><span>&nbsp;</span><br/>Some text</p>");
+    public void testCollapseInsignificantBrWithEmptyElementsHTML4() throws IOException {
+    	properties.setHtmlVersion(HtmlCleaner.HTML_4);
+        properties.addPruneTagNodeCondition(new TagNodeEmptyContentCondition(properties.getTagInfoProvider()));
+    	TagNode collapsed = cleaner.clean("<p><span>&nbsp;</span><br/>Some text</p>");
         assertEquals("<p>Some text</p>", serializer.getAsString(collapsed));
         collapsed = cleaner.clean("<p>Some text<br><span></span><BR/><u><big></big></u><BR/></p>");
         assertEquals("<p>Some text</p>", serializer.getAsString(collapsed));
@@ -153,13 +155,37 @@ public class CollapseHtmlTest extends TestCase {
         assertEquals("<p>Some text</p>", serializer.getAsString(collapsed));
 
     }
+    
+    public void testCollapseInsignificantBrWithEmptyElementsHTML5() throws IOException {
+    	properties.setHtmlVersion(HtmlCleaner.HTML_5);
+        properties.addPruneTagNodeCondition(new TagNodeEmptyContentCondition(properties.getTagInfoProvider()));
+    	TagNode collapsed = cleaner.clean("<p><span>&nbsp;</span><br/>Some text</p>");
+        assertEquals("<p>Some text</p>", serializer.getAsString(collapsed));
+        collapsed = cleaner.clean("<p>Some text<br><span></span><BR/><u></u><BR/></p>");
+        assertEquals("<p>Some text</p>", serializer.getAsString(collapsed));
+        collapsed = cleaner.clean("<p>Some text<br><span></span><BR/><u></u><BR/><u></u></p>");
+        assertEquals("<p>Some text</p>", serializer.getAsString(collapsed));
+
+    }
 
     /**
      * Br nested in formating elements should be eliminated.
      */
-    public void testInsureMeaninglessBrsStillCollapseEmptyElements() throws IOException {
-        TagNode collapsed = cleaner.clean("<p><u><br/></u>Some text<br><span><BR/><u><big><BR/></big></u></p></span>");
-        assertEquals("<p>Some text</p>", serializer.getAsString(collapsed));
+    public void testInsureMeaninglessBrsStillCollapseEmptyElementsHTML4() throws IOException {
+    	properties.setHtmlVersion(HtmlCleaner.HTML_4);
+        properties.addPruneTagNodeCondition(new TagNodeEmptyContentCondition(properties.getTagInfoProvider()));
+    	TagNode collapsed;
+    	collapsed = cleaner.clean("<p><u><br/></u>Some text<br><span><BR/><u><big><BR/></big></u></p></span>");
+    	assertEquals("<p>Some text</p>", serializer.getAsString(collapsed));
+    }
+    
+    
+    public void testInsureMeaninglessBrsStillCollapseEmptyElementsHTML5() throws IOException {
+    	properties.setHtmlVersion(HtmlCleaner.HTML_5);
+        properties.addPruneTagNodeCondition(new TagNodeEmptyContentCondition(properties.getTagInfoProvider()));
+       	TagNode collapsed;
+    	collapsed = cleaner.clean("<p><u><br/></u>Some text<br><span><BR/><u><BR/></u></p></span>");
+    	assertEquals("<p>Some text</p>", serializer.getAsString(collapsed));
     }
 
     /**

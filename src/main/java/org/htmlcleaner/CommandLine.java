@@ -43,6 +43,7 @@ import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.net.URL;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
@@ -104,9 +105,19 @@ public class CommandLine {
 
     public static void main(String[] args) throws IOException, XPatherException {
         String source = getArgValue(args, "src", "");
+        Scanner scan = new Scanner(System.in);
+        String s = "";
+        
         if ( "".equals(source) ) {
-            System.err.println("Usage: java -jar htmlcleanerXX.jar src=<url | file> [incharset=<charset>] " +
+        	 while (scan.hasNext()) {
+                 s += scan.nextLine();
+             }
+             if (s.compareTo("") != 0) {
+                 System.err.println("Output:");
+             } else {
+            System.err.println("Usage: java -jar htmlcleanerXX.jar src=<url | file> [htmlver=4] [incharset=<charset>] " +
                                "[dest=<file>] [outcharset=<charset>] [taginfofile=<file>] [options...]");
+            System.err.println("Alternative: java -jar htmlcleanerXX.jar (reads the input from console)");
             System.err.println("");
             System.err.println("where options include:");
             System.err.println("    outputtype=simple* | compact | browser-compact | pretty");
@@ -134,6 +145,7 @@ public class CommandLine {
             System.err.println("    t:<sourcetagX>[=<desttag>[,<preserveatts>]]");
             System.err.println("    t:<sourcetagX>.<destattrY>[=<template>]");
             System.exit(1);
+             }
         }
 
         String inCharset = getArgValue(args, "incharset", "");
@@ -146,6 +158,7 @@ public class CommandLine {
             outCharset = CleanerProperties.DEFAULT_CHARSET;
         }
 
+        String htmlversion = getArgValue(args, "htmlver", "");
         String destination = getArgValue(args, "dest", "");
         String outputType = getArgValue(args, "outputtype", "");
         String advancedXmlEscape = getArgValue(args, "advancedxmlescape", "");
@@ -171,12 +184,15 @@ public class CommandLine {
         String nodeByXPath = getArgValue(args, "nodebyxpath", "");
 
         HtmlCleaner cleaner;
-
+        	
         String tagInfoFile = getArgValue(args, "taginfofile", "");
         if ( !"".equals(tagInfoFile) ) {
             cleaner = new HtmlCleaner(new ConfigFileTagProvider(new File(tagInfoFile)));
-        } else {
-            cleaner = new HtmlCleaner();
+        } else { //Set appropriate TagProvider
+        	if (htmlversion.compareTo("4")==0)
+        		cleaner = new HtmlCleaner(Html4TagProvider.INSTANCE);
+        	else
+        		cleaner = new HtmlCleaner(Html5TagProvider.INSTANCE);
         }
 
         final CleanerProperties props = cleaner.getProperties();
@@ -268,6 +284,8 @@ public class CommandLine {
             props.setBooleanAttributeValues(booleanAtts);
         }
 
+        
+        	
         // collect transformation info
         Map transInfos = new TreeMap();
         for (String arg2 : args) {
@@ -287,10 +305,13 @@ public class CommandLine {
         TagNode node;
 
         String src = source.toLowerCase();
-        if ( src.startsWith("http://") || src.startsWith("https://") ) {
+        
+        if (src.startsWith("http://") || src.startsWith("https://")) {
             node = cleaner.clean(new URL(src), inCharset);
-        } else {
+        } else if (!src.isEmpty()) {
             node = cleaner.clean(new File(src), inCharset);
+        } else {
+            node = cleaner.clean(s);
         }
 
         // if user specifies XPath expresssion to choose node for serialization, then
@@ -316,6 +337,8 @@ public class CommandLine {
         } else {
             out = new FileOutputStream(destination);
         }
+        
+        	
 
         if ( "compact".equals(outputType) ) {
             new CompactXmlSerializer(props).writeToStream(node, out, outCharset);
