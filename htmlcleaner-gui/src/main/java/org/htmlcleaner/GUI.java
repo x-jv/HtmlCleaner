@@ -1,4 +1,7 @@
-/*  Copyright (c) 2013, Marton Szeles
+package org.htmlcleaner;
+import test.resources.images.*;
+
+/**  Copyright (c) 2013, Marton Szeles
     All rights reserved.
 
     Redistribution and use of this software in source and binary forms,
@@ -29,12 +32,14 @@
     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
     POSSIBILITY OF SUCH DAMAGE.
-*/
+**/
 
-package org.htmlcleaner;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.htmlcleaner.conditional.TagNodeEmptyContentCondition;
+
 
 import java.awt.event.*;
 import java.awt.*;
@@ -46,7 +51,6 @@ import java.net.URL;
 
 
 public class GUI extends JFrame {
-	//private JTextField txt;
 	private JTextField inputText;
 	private JTextField outputText;
 
@@ -499,7 +503,7 @@ public class GUI extends JFrame {
 		lblHelp.setToolTipText("Cick here for details");
 		lblHelp.setBackground(new Color(255, 250, 250));
 		lblHelp.setForeground(Color.BLUE);
-		lblHelp.setBounds(494, 334, 238, 57);
+		lblHelp.setBounds(498, 372, 234, 29);
 		getContentPane().add(lblHelp);
 
 		lblHelp.addMouseListener(new MouseAdapter() {
@@ -544,7 +548,10 @@ public class GUI extends JFrame {
 				if ( inputSrc.startsWith("http://") || inputSrc.startsWith("https://") ) {		// It's a URL
 
 					try {
-						tagNode = new HtmlCleaner(props).clean(new URL(inputSrc), "utf-8");
+						if (props.getHtmlVersion()==4)
+							tagNode = new HtmlCleaner(Html4TagProvider.INSTANCE,props).clean(new URL(inputSrc), "utf-8");
+						else
+							tagNode = new HtmlCleaner(props).clean(new URL(inputSrc), "utf-8");
 						new PrettyXmlSerializer(props).writeToFile( // OUTPUT
 								tagNode, outputSrc, "utf-8");
 					} catch (MalformedURLException e1) {
@@ -556,8 +563,13 @@ public class GUI extends JFrame {
 
 				}else{														// It's a FILE
 					try {
-						tagNode = new HtmlCleaner(props).clean( // INPUT
-								new File(inputSrc), "utf-8");
+				        props.addPruneTagNodeCondition(new TagNodeEmptyContentCondition(props.getTagInfoProvider()));
+						if (props.getHtmlVersion()==4)
+							tagNode = new HtmlCleaner(Html4TagProvider.INSTANCE,props).clean( // INPUT
+									new File(inputSrc), "utf-8");
+						else
+							tagNode = new HtmlCleaner(props).clean( // INPUT
+									new File(inputSrc), "utf-8");
 
 						new PrettyXmlSerializer(props).writeToFile( // OUTPUT
 								tagNode, outputSrc, "utf-8");
@@ -574,7 +586,47 @@ public class GUI extends JFrame {
 		setIconImage(Toolkit.getDefaultToolkit().getImage("icon.png"));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // enabling exiting on X
 		container.setBackground(Color.WHITE);
-		setResizable(false);
+		
+		JLabel lblUse = new JLabel("Use:");
+		lblUse.setBounds(498, 339, 27, 20);
+		getContentPane().add(lblUse);
+		
+		String com[]={"Html 4","Html 5"};
+		JComboBox comboBox = new JComboBox(com);
+		comboBox.setSelectedIndex(1);
+		comboBox.setBounds(531, 334, 62, 25);
+		getContentPane().add(comboBox);
+		
+		comboBox.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					String item=(String) e.getItem();
+					
+					if (item.compareTo("Html 4")==0){
+						props.setHtmlVersion(HtmlCleaner.HTML_4);
+					}
+					else{
+						props.setHtmlVersion(HtmlCleaner.HTML_5);
+					}
+					props.reset();
+					setOmitUnknownTags.setSelected(false);
+					setTreatUnknownTagsAsContent.setSelected(false);
+					setOmitDeprecatedTags.setSelected(false);
+					setTreatDeprecatedTagsAsContent.setSelected(false); 
+					setOmitComments.setSelected(false);
+					setOmitXmlDeclaration.setSelected(false);
+					setAllowHtmlInsideAttributes.setSelected(false);
+					setNamespacesAware.setSelected(false);
+					
+			       }
+				
+			}
+		});
+		
+		
+		
 
 	}
 
@@ -591,5 +643,4 @@ public class GUI extends JFrame {
 			}
 		});  
 	}
-	
 }
