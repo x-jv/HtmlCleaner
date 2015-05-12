@@ -129,7 +129,6 @@ public class TagCopyingAndLimitingTest extends TestCase {
 
         String cleanedOutput = getOutput(cleanedNode, cleaner.getProperties());
         String expectedOutput = getOutput(expectedNode, cleaner.getProperties());
-        System.out.print(cleanedOutput);
         assertEquals(expectedOutput, cleanedOutput);
     }
     
