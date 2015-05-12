@@ -221,7 +221,7 @@ public abstract class XmlSerializer extends Serializer {
     
     /**
      * @param tagNode
-     * @return
+     * @return true if the tag is forbidden
      */
     protected boolean isForbiddenTag(TagNode tagNode) {
         // null tagName when rootNode is a dummy node.
