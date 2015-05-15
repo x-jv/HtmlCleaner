@@ -706,7 +706,6 @@ public class Html5TagProvider implements ITagInfoProvider {
 
 		tagInfo = new TagInfo("label", ContentType.all, BelongsTo.BODY, false,
 				false, false, CloseTag.required, Display.inline);
-		tagInfo.defineFatalTags("label");
 		this.put("label", tagInfo);
 
 		tagInfo = new TagInfo("legend", ContentType.all, BelongsTo.BODY, false,

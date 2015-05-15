@@ -9,6 +9,20 @@ import org.junit.Test;
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
 	
 	/**
+	 * Label tag - see Bug #138
+	 */
+	@Test
+	public void testLabel(){
+		String initial = "<form><label for=\"male\">Male</label><input type=\"radio\" name=\"sex\" id=\"male\" value=\"male\" /><label for=\"female\">Female</label><input type=\"radio\" name=\"sex\" id=\"female\" value=\"female\" /><input type=\"submit\" value=\"Submit\" /></form>";
+		String expected = "<html><head /><body>"+initial+"</body></html>";
+		cleaner.getProperties().setNamespacesAware(true);
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);		
+	}
+	
+	/**
 	 * Option tags have two fatal tags - see Bug #137
 	 */
 	@Test
