@@ -113,7 +113,7 @@ public class TagInfo {
     private Set<String> continueAfterTags = new HashSet<String>();
     private BelongsTo belongsTo = BelongsTo.BODY;
     private String requiredParent;
-    private String fatalTag;
+    private Set<String>fatalTags = new HashSet<String>();
     private boolean deprecated;
     private boolean unique;
     private boolean ignorePermitted;
@@ -135,7 +135,7 @@ public class TagInfo {
         StringTokenizer tokenizer = new StringTokenizer(commaSeparatedListOfTags.toLowerCase(), ",");
         while (tokenizer.hasMoreTokens()) {
             String currTag = tokenizer.nextToken();
-            this.fatalTag = currTag;
+            this.fatalTags.add(currTag);
             this.higherTags.add(currTag);
         }
     }
@@ -284,13 +284,20 @@ public class TagInfo {
     public void setBelongsTo(BelongsTo belongsTo) {
         this.belongsTo = belongsTo;
     }
-
-    public String getFatalTag() {
-        return fatalTag;
+    
+    public Set<String> getFatalTags(){
+    	return this.fatalTags;
+    }
+    
+    public boolean isFatalTag(String tag){
+    	for (String fatalTag:this.fatalTags){
+    		if (tag.equals(fatalTag)) return true;
+    	}
+    	return false;
     }
 
     public void setFatalTag(String fatalTag) {
-        this.fatalTag = fatalTag;
+        this.fatalTags.add(fatalTag);
     }
 
     public boolean isDeprecated() {

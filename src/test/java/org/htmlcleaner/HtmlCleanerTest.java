@@ -9,6 +9,20 @@ import org.junit.Test;
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
 	
 	/**
+	 * Option tags have two fatal tags - see Bug #137
+	 */
+	@Test
+	public void testSelect(){
+		String initial = "<select><option>test1</option></select>";
+		String expected = "<html><head /><body><select><option>test1</option></select></body></html>";
+		cleaner.getProperties().setNamespacesAware(true);
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);		
+	}
+	
+	/**
 	 * This is to test that we don't get an NPE with a malformed HTTPS XHTML namespace. See issue #133
 	 */
 	@Test

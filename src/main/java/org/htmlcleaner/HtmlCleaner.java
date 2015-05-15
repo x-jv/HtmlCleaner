@@ -237,15 +237,12 @@ public class HtmlCleaner {
                 ListIterator<TagPos> it = list.listIterator(list.size());
                 String fatalTag = null;
                 TagInfo fatalInfo = getTagInfoProvider().getTagInfo(tagName);
-                if (fatalInfo != null) {
-                    fatalTag = fatalInfo.getFatalTag();
-                }
 
                 while (it.hasPrevious()) {
                     TagPos currTagPos = it.previous();
                     if (tagName.equals(currTagPos.name)) {
                         return currTagPos;
-                    } else if (fatalTag != null && fatalTag.equals(currTagPos.name)) {
+                    } else if (fatalInfo != null && fatalInfo.isFatalTag(currTagPos.name)) {
                         // do not search past a fatal tag for this tag
                         return null;
                     }
@@ -581,12 +578,17 @@ public class HtmlCleaner {
      * @param tag
      */
     private boolean isFatalTagSatisfied(TagInfo tag, CleanTimeValues cleanTimeValues) {
+		boolean fatal = true;
     	if (tag != null) {
-            String fatalTagName = tag.getFatalTag();
-            return fatalTagName == null ? true : getOpenTags(cleanTimeValues).tagExists(fatalTagName);
+    		if (tag.getFatalTags().isEmpty()) return true;
+    		fatal = false;
+    		for (String fatalTagName:tag.getFatalTags()){
+    			if(getOpenTags(cleanTimeValues).tagExists(fatalTagName)){
+    				fatal = true;
+    			}
+    		}
     	}
-
-    	return true;
+    	return fatal;
     }
 
     /**
@@ -598,14 +600,15 @@ public class HtmlCleaner {
     	if (tag != null) {
     		String requiredParent = tag.getRequiredParent();
     		if (requiredParent != null) {
-	    		String fatalTag = tag.getFatalTag();
-                int fatalTagPositon = -1;
-                if (fatalTag != null) {
-                    TagPos tagPos = getOpenTags(cleanTimeValues).findTag(fatalTag);
-                    if (tagPos != null) {
-                        fatalTagPositon = tagPos.position;
-                    }
-                }
+    			int fatalTagPositon = -1;
+    			for (String fatalTag:tag.getFatalTags()){
+    				if (fatalTag != null) {
+    					TagPos tagPos = getOpenTags(cleanTimeValues).findTag(fatalTag);
+    					if (tagPos != null) {
+    						fatalTagPositon = tagPos.position;
+    					}
+    				}
+    			}
 
 	    		// iterates through the list of open tags from the end and check if there is some higher
 	    		ListIterator it = getOpenTags(cleanTimeValues).list.listIterator( getOpenTags(cleanTimeValues).list.size() );
