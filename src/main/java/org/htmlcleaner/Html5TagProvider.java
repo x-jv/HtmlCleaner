@@ -470,21 +470,13 @@ public class Html5TagProvider implements ITagInfoProvider {
 
 		tagInfo = new TagInfo("rt", ContentType.text, BelongsTo.BODY, false,
 				false, false, CloseTag.optional, Display.inline);
-		//
-		// If we include this rule, we get an out-of-memory error. See issue
-		// 126.
-		//
-		// tagInfo.defineRequiredEnclosingTags("ruby");
+		tagInfo.defineRequiredEnclosingTags("ruby");
 		tagInfo.defineAllowedChildrenTags(PHRASING_TAGS);
 		this.put("rt", tagInfo);
 
 		tagInfo = new TagInfo("rp", ContentType.text, BelongsTo.BODY, false,
 				false, false, CloseTag.optional, Display.inline);
-		//
-		// If we include this rule, we get an out-of-memory error. See issue
-		// 126.
-		//
-		// tagInfo.defineRequiredEnclosingTags("ruby");
+		tagInfo.defineRequiredEnclosingTags("ruby");
 		tagInfo.defineAllowedChildrenTags(PHRASING_TAGS);
 		this.put("rp", tagInfo);
 	}
@@ -710,8 +702,7 @@ public class Html5TagProvider implements ITagInfoProvider {
 
 		tagInfo = new TagInfo("legend", ContentType.all, BelongsTo.BODY, false,
 				false, false, CloseTag.required, Display.block);
-		// Bug with fieldset
-		// tagInfo.defineRequiredEnclosingTags("fieldset");
+		tagInfo.defineRequiredEnclosingTags("fieldset");
 		tagInfo.defineAllowedChildrenTags(PHRASING_TAGS);
 		this.put("legend", tagInfo);
 

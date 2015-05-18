@@ -112,7 +112,7 @@ public class TagInfo {
     private Set<String> copyTags = new HashSet<String>();
     private Set<String> continueAfterTags = new HashSet<String>();
     private BelongsTo belongsTo = BelongsTo.BODY;
-    private String requiredParent;
+    private Set<String>requiredParentTags = new HashSet<String>();
     private Set<String>fatalTags = new HashSet<String>();
     private boolean deprecated;
     private boolean unique;
@@ -144,7 +144,7 @@ public class TagInfo {
         StringTokenizer tokenizer = new StringTokenizer(commaSeparatedListOfTags.toLowerCase(), ",");
         while (tokenizer.hasMoreTokens()) {
             String currTag = tokenizer.nextToken();
-            this.requiredParent = currTag;
+            this.requiredParentTags.add(currTag);
             this.higherTags.add(currTag);
         }
     }
@@ -269,12 +269,12 @@ public class TagInfo {
         this.continueAfterTags = continueAfterTags;
     }
 
-    public String getRequiredParent() {
-        return requiredParent;
-    }
+   public Set<String> getRequiredParentTags() {
+        return requiredParentTags;
+   }
 
     public void setRequiredParent(String requiredParent) {
-        this.requiredParent = requiredParent;
+        this.requiredParentTags.add(requiredParent);
     }
 
     public BelongsTo getBelongsTo() {

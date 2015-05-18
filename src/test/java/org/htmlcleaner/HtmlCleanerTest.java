@@ -8,6 +8,47 @@ import org.junit.Test;
 
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
 	
+	// See bug #129
+	@Test
+	public void testFragment(){
+		String initial = "<table><rt><td>";
+		String expected = "<html><head /><body><ruby><rt /></ruby><table></table></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+    }
+	
+	@Test
+	public void testTwiddleTR(){
+		String initial = "<table><tr><td>test</td></rt></table>";
+		String expected = "<html><head /><body><table><tbody><tr><td>test</td></tr></tbody></table></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+    }
+	
+	@Test
+	public void testMissingRuby(){
+		String initial = "<rt>test</rt>";
+		String expected = "<html><head /><body><ruby>"+initial+"</ruby></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+    }
+	
+	@Test
+	public void testMissingRt(){
+		String initial = "<rp>(</rp>ㄏㄢˋ<rp>)</rp>";
+		String expected = "<html><head /><body><ruby>"+initial+"</ruby></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+	}
+	
 	/**
 	 * Label tag - see Bug #138
 	 */
