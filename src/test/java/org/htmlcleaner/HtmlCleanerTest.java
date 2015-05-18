@@ -19,6 +19,17 @@ public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
         assertEquals(expected, output);	
     }
 	
+	// See bug #140
+	@Test
+	public void testSource(){
+		String initial = "<source />";
+		String expected = "<html><head /><body><audio><source /></audio></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+    }
+	
 	@Test
 	public void testTwiddleTR(){
 		String initial = "<table><tr><td>test</td></rt></table>";
