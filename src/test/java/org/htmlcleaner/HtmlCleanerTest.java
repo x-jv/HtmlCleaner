@@ -10,6 +10,17 @@ public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
 	
 	// See bug #129
 	@Test
+	public void testLegend(){
+		String initial = "<form><legend>banana";
+		String expected = "<html><head /><body><form><fieldset><legend>banana</legend></fieldset></form></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+    }
+	
+	// See bug #126
+	@Test
 	public void testFragment(){
 		String initial = "<table><rt><td>";
 		String expected = "<html><head /><body><ruby><rt /></ruby><table></table></body></html>";
