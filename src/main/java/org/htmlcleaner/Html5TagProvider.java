@@ -528,7 +528,7 @@ public class Html5TagProvider implements ITagInfoProvider {
 
 		tagInfo = new TagInfo("source", ContentType.none, BelongsTo.BODY,
 				false, false, false, CloseTag.forbidden, Display.any);
-		tagInfo.defineRequiredEnclosingTags(MEDIA_TAGS);
+		tagInfo.defineRequiredEnclosingTags("audio,video,object");
 		this.put("source", tagInfo);
 
 		tagInfo = new TagInfo("track", ContentType.none, BelongsTo.BODY, false,
