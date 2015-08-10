@@ -30,6 +30,7 @@ Zip these up as htmlcleaner-V.v.zip
 5.2 GUI
 create a folder for the "gui" release
 cd to the htmlcleaner-gui subproject
+update the pom.xml with the new version
 mvn clean package
 copy htmlcleaner-gui-V.v-with-dependencies.jar to the gui release folder
 rename to remove the "-with-dependencies" part of the file name
