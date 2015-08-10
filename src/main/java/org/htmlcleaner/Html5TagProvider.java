@@ -739,11 +739,14 @@ public class Html5TagProvider implements ITagInfoProvider {
 	 */
 	public void metadataTags(TagInfo tagInfo) {
 
-		tagInfo = new TagInfo("meta", ContentType.none, BelongsTo.HEAD, false,
+		// As of HTML5, meta can be used in <body> where it has a @name attribute
+		// TODO add attribute rules
+		tagInfo = new TagInfo("meta", ContentType.none, BelongsTo.HEAD_AND_BODY, false,
 				false, false, CloseTag.forbidden, Display.none);
 		this.put("meta", tagInfo);
-
-		tagInfo = new TagInfo("link", ContentType.none, BelongsTo.HEAD, false,
+		// As of HTML5, link can be used in <body> where it has an  @itemprop attribute
+		// TODO add attribute rules
+		tagInfo = new TagInfo("link", ContentType.none, BelongsTo.HEAD_AND_BODY, false,
 				false, false, CloseTag.forbidden, Display.none);
 		this.put("link", tagInfo);
 
