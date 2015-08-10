@@ -8,6 +8,17 @@ import org.junit.Test;
 
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
 	
+	// See bug #146
+	@Test
+	public void testMissingTr(){
+		String initial = "<table><td>banana</td></table>";
+		String expected = "<html><head /><body><table><tbody><tr><td>banana</td></tr></tbody></table></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+    }
+	
 	// See bug #129
 	@Test
 	public void testLegend(){
@@ -23,7 +34,7 @@ public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
 	@Test
 	public void testFragment(){
 		String initial = "<table><rt><td>";
-		String expected = "<html><head /><body><ruby><rt /></ruby><table></table></body></html>";
+		String expected = "<html><head /><body><ruby><rt /></ruby><table><tbody><tr><td></td></tr></tbody></table></body></html>";
 		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
         TagNode cleaned = cleaner.clean(initial);
         String output = serializer.getAsString(cleaned);
