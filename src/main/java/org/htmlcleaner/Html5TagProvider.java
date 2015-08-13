@@ -280,15 +280,23 @@ public class Html5TagProvider implements ITagInfoProvider {
 		tagInfo = new TagInfo("ul", ContentType.all, BelongsTo.BODY, false,
 				false, false, CloseTag.required, Display.block);
 		tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
-		tagInfo.defineCloseBeforeTags(CLOSE_BEFORE_TAGS);
-		tagInfo.defineAllowedChildrenTags("li");
+		tagInfo.defineCloseBeforeTags("dl,"+CLOSE_BEFORE_TAGS);
+		//
+		// This is not correct, but is how most browsers seem to handle
+		// lists. Strictly, only an LI can be a child of a UL or OL
+		//
+		tagInfo.defineAllowedChildrenTags("li,ul,ol");
 		this.put("ul", tagInfo);
 
 		tagInfo = new TagInfo("ol", ContentType.all, BelongsTo.BODY, false,
 				false, false, CloseTag.required, Display.block);
 		tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
-		tagInfo.defineCloseBeforeTags(CLOSE_BEFORE_TAGS);
-		tagInfo.defineAllowedChildrenTags("li");
+		tagInfo.defineCloseBeforeTags("dl,"+CLOSE_BEFORE_TAGS);
+		//
+		// This is not correct, but is how most browsers seem to handle
+		// lists. Strictly, only an LI can be a child of a UL or OL
+		//
+		tagInfo.defineAllowedChildrenTags("li,ul,ol");
 		this.put("ol", tagInfo);
 
 		tagInfo = new TagInfo("li", ContentType.all, BelongsTo.BODY, false,
