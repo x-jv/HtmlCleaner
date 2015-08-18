@@ -308,8 +308,8 @@ public class CommandLine {
         
         if (src.startsWith("http://") || src.startsWith("https://")) {
             node = cleaner.clean(new URL(src), inCharset);
-        } else if (!src.isEmpty()) {
-            node = cleaner.clean(new File(src), inCharset);
+        } else if (!source.isEmpty()) {
+            node = cleaner.clean(new File(source), inCharset);
         } else {
             node = cleaner.clean(s);
         }
