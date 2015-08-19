@@ -285,7 +285,7 @@ public class Html5TagProvider implements ITagInfoProvider {
 		// This is not correct, but is how most browsers seem to handle
 		// lists. Strictly, only an LI can be a child of a UL or OL
 		//
-		tagInfo.defineAllowedChildrenTags("li,ul,ol");
+		tagInfo.defineAllowedChildrenTags("li,ul,ol,div");
 		this.put("ul", tagInfo);
 
 		tagInfo = new TagInfo("ol", ContentType.all, BelongsTo.BODY, false,
@@ -296,7 +296,7 @@ public class Html5TagProvider implements ITagInfoProvider {
 		// This is not correct, but is how most browsers seem to handle
 		// lists. Strictly, only an LI can be a child of a UL or OL
 		//
-		tagInfo.defineAllowedChildrenTags("li,ul,ol");
+		tagInfo.defineAllowedChildrenTags("li,ul,ol,div");
 		this.put("ol", tagInfo);
 
 		tagInfo = new TagInfo("li", ContentType.all, BelongsTo.BODY, false,
