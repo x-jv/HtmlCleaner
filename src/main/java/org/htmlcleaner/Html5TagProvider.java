@@ -463,12 +463,13 @@ public class Html5TagProvider implements ITagInfoProvider {
 
 		tagInfo = new TagInfo("ruby", ContentType.all, BelongsTo.BODY, false,
 				false, false, CloseTag.required, Display.inline);
-		tagInfo.defineAllowedChildrenTags("rt,rp");
+		tagInfo.defineAllowedChildrenTags("rt,rp,rb,rtc");
 		this.put("ruby", tagInfo);
 
 		tagInfo = new TagInfo("rtc", ContentType.all, BelongsTo.BODY, false,
 				false, false, CloseTag.optional, Display.inline);
 		tagInfo.defineRequiredEnclosingTags("ruby");
+		tagInfo.defineAllowedChildrenTags("rt,"+PHRASING_TAGS);
 		this.put("rtc", tagInfo);
 
 		tagInfo = new TagInfo("rb", ContentType.all, BelongsTo.BODY, false,
