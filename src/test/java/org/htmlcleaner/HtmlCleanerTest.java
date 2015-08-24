@@ -10,6 +10,20 @@ import org.junit.Test;
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
 	
 	/**
+	 * This is to test issue #139
+	 * @throws IOException
+	 */
+	@Test
+	public void optGroupTest() throws IOException{
+		String initial = "<select><optgroup><option>x</option></optgroup></select>";
+		String expected = "<html><head /><body><select><optgroup><option>x</option></optgroup></select></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+	}
+	
+	/**
 	 * This is to test issue #149
 	 * @throws IOException 
 	 */

@@ -690,7 +690,7 @@ public class Html5TagProvider implements ITagInfoProvider {
 		tagInfo = new TagInfo("option", ContentType.text, BelongsTo.BODY,
 				false, false, true, CloseTag.optional, Display.inline);
 		tagInfo.defineFatalTags("select,datalist");
-		tagInfo.defineCloseBeforeTags("option,optgroup");
+		tagInfo.defineCloseBeforeTags("option");
 		this.put("option", tagInfo);
 
 		tagInfo = new TagInfo("optgroup", ContentType.all, BelongsTo.BODY,
