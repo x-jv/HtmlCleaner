@@ -9,6 +9,39 @@ import org.junit.Test;
 
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
 	
+
+	
+	/**
+	 * This is to test issue #131
+	 * @throws IOException
+	 */
+	@Ignore // We should fix this, but it isn't critical
+	@Test
+	public void moveTableContent() throws IOException{
+		String initial = "<table><tbody><h2>hi</h2><tr><td></td></tr></tbody></table>";
+		String expected = "<html><head /><body><h2>hi</h2><table><tbody><tr><td></td></tr></tbody></table></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+	}
+	
+	/**
+	 * This is to test issue #136
+	 * @throws IOException
+	 */
+	@Test
+	public void emptyXmlns() throws IOException{
+		String initial = "<html><head><meta xmlns=\"\" name=\"a\" content=\"1\"><meta xmlns=\"\" name=\"b\" content=\"2\"><meta xmlns=\"\" name=\"c\" content=\"3\"><meta xmlns=\"\" name=\"d\" content=\"4\"></head><body></body></html>";
+		String expected = "<html><head><meta name=\"a\" content=\"1\" /><meta name=\"b\" content=\"2\" /><meta name=\"c\" content=\"3\" /><meta name=\"d\" content=\"4\" /></head><body></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+		cleaner.getProperties().setNamespacesAware(true);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+	}
+	
+	
 	/**
 	 * This is to test issue #139
 	 * @throws IOException
