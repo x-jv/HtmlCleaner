@@ -4,9 +4,48 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
+	
+	/**
+	 * This is to test issue #149
+	 * @throws IOException 
+	 */
+	@Test
+	public void rbTest() throws IOException{
+		
+		String initial = "<p><br /> <br /><rb></rb><rtc><rt></rtc><br /></p>";
+		String expected = "<html><head /><body><p><br /> <br /><br /><ruby><rb /><rtc><rt /></rtc></ruby></p></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+	}
+	
+	// See bug #147
+	@Test
+	public void testCorrectUlStructure(){
+		String initial = "<UL><LI>1</LI><LI>2</LI><UL></LI></UL><LI>3</LI></UL>";
+		String expected = "<html><head /><body><ul><li>1</li><li>2</li><ul></ul><li>3</li></ul></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+	}
+	
+	// See bug #145
+	@Test
+	@Ignore // We do want to fix this, but its not critical
+	public void testCorrectTableStructure(){
+		String initial = "<table><tr><td><div><td></div></td> </tr></table>";
+		String expected = "<html><head /><body><table><tbody><tr><td><div>/div></td><td></td></tr></tbody></table></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+	}
 	
 	// See bug #146
 	@Test
