@@ -222,11 +222,22 @@ public class Utils {
         if (unicode.length() > 0) {
         	try {
         	    boolean isHex = unicode.substring(0,1).equals("x");
-        		char unicodeChar = isHex ?
-                                        (char)Integer.parseInt(unicode.substring(1), 16) :
-                                        (char)Integer.parseInt(unicode.toString());
-                SpecialEntity specialEntity = SpecialEntities.INSTANCE.getSpecialEntityByUnicode(unicodeChar);
-                if (unicodeChar == 0) {
+        	    
+        	    //
+        	    // Get the unicode character and code point
+        	    //
+        	    int codePoint = -1;
+        	    char[] unicodeChar = null;    
+        	    if (isHex){
+        	    	codePoint = Integer.parseInt(unicode.substring(1), 16);
+        	    	unicodeChar = Character.toChars(codePoint);
+        	    } else {
+        	    	codePoint = Integer.parseInt(unicode.toString());
+        	    	unicodeChar =  Character.toChars(codePoint);
+        	    }
+        	    
+        	    SpecialEntity specialEntity = SpecialEntities.INSTANCE.getSpecialEntityByUnicode(codePoint);
+                if (unicodeChar.length == 1 && unicodeChar[0] == 0) {
                     // null character &#0Peanut for example
                     // just consume character &
                     result.append("&amp;");
@@ -241,7 +252,7 @@ public class Utils {
                 } else if ( recognizeUnicodeChars ) {
                     // output unicode characters as their actual byte code with the exception of characters that have special xml meaning.
                     result.append( String.valueOf(unicodeChar));
-                } else if ( ASCII_CHAR.matcher(new String(new char[] { unicodeChar } )).find()) {
+                } else if ( ASCII_CHAR.matcher(new String(unicodeChar)).find()) {
                     // ascii printable character. this fancy escaping might be an attempt to slip in dangerous characters (i.e. spelling out <script> )
                     // by converting to printable characters we can more easily detect such attacks.
                     result.append(String.valueOf(unicodeChar));
