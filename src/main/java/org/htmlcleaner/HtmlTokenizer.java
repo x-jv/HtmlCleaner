@@ -73,9 +73,9 @@ public class HtmlTokenizer {
     private transient Set<String> _namespacePrefixes = new HashSet<String>();
 
     private boolean _asExpected = true;
-
-    private boolean _isScriptContext;
-    private boolean _isStyleContext;
+    
+    private boolean _isSpecialContext;
+    private String _isSpecialContextName;
 
     private HtmlCleaner cleaner;
     private CleanerProperties props;
@@ -397,108 +397,83 @@ public class HtmlTokenizer {
      */
     void start() throws IOException {
     	// initialize runtime values
-        _currentTagToken = null;
-        _tokenList.clear();
-        _asExpected = true;
-        _isScriptContext = false;
-        _isStyleContext = false;
-        _isLateForDoctype = false;
-        _namespacePrefixes.clear();
+    	_currentTagToken = null;
+    	_tokenList.clear();
+    	_asExpected = true;
+    	_isSpecialContext = false;
+    	_isLateForDoctype = false;
+    	_namespacePrefixes.clear();
 
-        this._pos = WORKING_BUFFER_SIZE;
-        readIfNeeded(0);
+    	this._pos = WORKING_BUFFER_SIZE;
+    	readIfNeeded(0);
 
-        boolean isScriptEmpty = true;
-        boolean isStyleEmpty = true;
+    	boolean isSpecialEmpty = true;
 
-        while ( !isAllRead() ) {
-            // resets all the runtime values
-            _saved.delete(0, _saved.length());
-            _currentTagToken = null;
-            _asExpected = true;
+    	while ( !isAllRead() ) {
+    		// resets all the runtime values
+    		_saved.delete(0, _saved.length());
+    		_currentTagToken = null;
+    		_asExpected = true;
 
-            // this is enough for making decision
-            readIfNeeded(10);
+    		// this is enough for making decision
+    		readIfNeeded(10);
 
-            if (_isScriptContext) {
-            	if ( startsWith("</script") && (isWhitespace(_pos + 8) || isChar(_pos + 8, '>')) ) {
-            		tagEnd();
-            	} else if ( isScriptEmpty && startsWith("<!--") ) {
-            		comment();
-            	} else if ( startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) { 
-            		cdata();
-            	} else {
-            		boolean isTokenAdded = content();
-            		if (isScriptEmpty && isTokenAdded) {
-            			final BaseToken lastToken = (BaseToken) _tokenList.get(_tokenList.size() - 1);
-            			if (lastToken != null) {
-            				final String lastTokenAsString = lastToken.toString();
-            				if (lastTokenAsString != null && lastTokenAsString.trim().length() > 0) {
-            					isScriptEmpty = false;
-            				}
-            			}
-            		}
-            	}
-            	if (!_isScriptContext) {
-            		isScriptEmpty = true;
-            	}
-            } else {
-            	if (_isStyleContext) {
-            		if ( startsWith("</style") && (isWhitespace(_pos + 7) || isChar(_pos + 7, '>')) ) {
-            			tagEnd();
-            		} else if ( isStyleEmpty && startsWith("<!--") ) {
-            			comment();
-            		} else if ( startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) { 
-            			cdata();
-            		} else {
-            			boolean isTokenAdded = content();
-            			if (isStyleEmpty && isTokenAdded) {
-            				final BaseToken lastToken = (BaseToken) _tokenList.get(_tokenList.size() - 1);
-            				if (lastToken != null) {
-            					final String lastTokenAsString = lastToken.toString();
-            					if (lastTokenAsString != null && lastTokenAsString.trim().length() > 0) {
-            						isStyleEmpty = false;
-            					}
-            				}
-            			}
-            		}
-            		if (!_isStyleContext) {
-            			isStyleEmpty = true;
-            		}
+    		if (_isSpecialContext) {
+    			int nameLen = _isSpecialContextName.length();
+    			if ( startsWith("</" + _isSpecialContextName) && (isWhitespace(_pos + nameLen + 2) || isChar(_pos + nameLen + 2, '>')) ) {
+    				tagEnd();
+    			} else if ( isSpecialEmpty && startsWith("<!--") ) {
+    				comment();
+    			} else if ( startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) { 
+    				cdata();
+    			} else {
+    				boolean isTokenAdded = content();
+    				if (isSpecialEmpty && isTokenAdded) {
+    					final BaseToken lastToken = (BaseToken) _tokenList.get(_tokenList.size() - 1);
+    					if (lastToken != null) {
+    						final String lastTokenAsString = lastToken.toString();
+    						if (lastTokenAsString != null && lastTokenAsString.trim().length() > 0) {
+    							isSpecialEmpty = false;
+    						}
+    					}
+    				}
+    			}
+    			if (!_isSpecialContext) {
+    				isSpecialEmpty = true;
+    			}
+    		} else {
+    			if ( startsWith("<!doctype") ) {
+    				if ( !_isLateForDoctype ) {
+    					doctype();
+    					_isLateForDoctype = true;
+    				} else {
+    					ignoreUntil('<');
+    				}
+    			} else if ( startsWith("</") && isIdentifierStartChar(_pos + 2) ) {
+    				_isLateForDoctype = true;
+    				tagEnd();
+    			} else if ( startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) { 
+    				cdata();
+    			} else if ( startsWith("<!--") ) {
+    				comment();
+    			} else if ( startsWith("<") && isIdentifierStartChar(_pos + 1) ) {
+    				_isLateForDoctype = true;
+    				tagStart();
+    			} else if ( props.isIgnoreQuestAndExclam() && (startsWith("<!") || startsWith("<?")) ) {
+    				ignoreUntil('<');
+    				if (isChar('>')) {
+    					go();
+    				}
+    			} else if ( startsWith("<?xml")){
+    				ignoreUntil('<');
+    			} else {
+    				content();
+    			}
+    		}
+    	}
 
-            	} else {
-            		if ( startsWith("<!doctype") ) {
-            			if ( !_isLateForDoctype ) {
-            				doctype();
-            				_isLateForDoctype = true;
-            			} else {
-            				ignoreUntil('<');
-            			}
-            		} else if ( startsWith("</") && isIdentifierStartChar(_pos + 2) ) {
-            			_isLateForDoctype = true;
-            			tagEnd();
-            		} else if ( startsWith(CData.SAFE_BEGIN_CDATA) || startsWith(CData.BEGIN_CDATA) || startsWith(CData.SAFE_BEGIN_CDATA_ALT)) { 
-            			cdata();
-            		} else if ( startsWith("<!--") ) {
-            			comment();
-            		} else if ( startsWith("<") && isIdentifierStartChar(_pos + 1) ) {
-            			_isLateForDoctype = true;
-            			tagStart();
-            		} else if ( props.isIgnoreQuestAndExclam() && (startsWith("<!") || startsWith("<?")) ) {
-            			ignoreUntil('<');
-            			if (isChar('>')) {
-            				go();
-            			}
-            		} else if ( startsWith("<?xml")){
-            			ignoreUntil('<');
-            		} else {
-            			content();
-            		}
-            	}
-            }
-        }
 
-        _reader.close();
+    	_reader.close();
     }
 
     /**
@@ -554,12 +529,10 @@ public class HtmlTokenizer {
 
             if ( isChar('>') ) {
             	go();
-                if ( "script".equalsIgnoreCase(tagName) ) {
-                    _isScriptContext = true;
-                }
-                if ( "style".equalsIgnoreCase(tagName) ) {
-                    _isStyleContext = true;
-                }
+            	if ( props.isUseCdataFor(tagName) ) {
+            		_isSpecialContext = true;
+            		_isSpecialContextName = tagName;
+            	}           
             } else if ( startsWith("/>") ) {
             	go(2);
             	//
@@ -622,13 +595,10 @@ public class HtmlTokenizer {
             if ( isChar('>') ) {
             	go();
             }
-
-            if ( "script".equalsIgnoreCase(tagName) ) {
-                _isScriptContext = false;
-            }
             
-            if ( "style".equalsIgnoreCase(tagName) ) {
-                _isStyleContext = false;
+            if ( props.isUseCdataFor(tagName) ) {
+            	_isSpecialContext = false;
+            	_isSpecialContextName = tagName;
             }
 
 			//
@@ -881,7 +851,7 @@ public class HtmlTokenizer {
     	
     	boolean preserveComments = false;
     	
-    	if (!_isScriptContext && !_isStyleContext){
+    	if (!_isSpecialContext){
     		//
     		// if we're not set to omit invalid CDATA, then we turn it into a regular ContentNode
     		//
@@ -923,7 +893,7 @@ public class HtmlTokenizer {
         	// If we're not including CDATA outside of script and style tags, we don't
         	// add a token.
         	//
-        	if (_isScriptContext || _isStyleContext || !props.isOmitCdataOutsideScriptAndStyle()){
+        	if (_isSpecialContext || !props.isOmitCdataOutsideScriptAndStyle()){
         		
         			//
         			// Preserve comments

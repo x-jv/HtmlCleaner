@@ -128,7 +128,7 @@ public abstract class XmlSerializer extends Serializer {
     }
 
     protected boolean dontEscape(TagNode tagNode) {
-        return props.isUseCdataForScriptAndStyle() && isScriptOrStyle(tagNode);
+    	return props.isUseCdataFor(tagNode.getName());
     }
 
     protected boolean isMinimizedTagSyntax(TagNode tagNode) {

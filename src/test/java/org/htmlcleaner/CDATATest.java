@@ -112,32 +112,33 @@ public class CDATATest extends AbstractHtmlCleanerTest {
 
 		String initial = readFile("src/test/resources/test12.html");
 		String expected = readFile("src/test/resources/test12_expected.html");
-		
+
 		assertCleaned(initial, expected);
     }
-    
+
     @Test
     public void scriptAndCData() throws IOException
     {
-    	
+
         CleanerProperties cleanerProperties = new CleanerProperties();
         cleanerProperties.setOmitXmlDeclaration(false);
         cleanerProperties.setOmitDoctypeDeclaration(false);
         cleanerProperties.setIgnoreQuestAndExclam(false);
         cleanerProperties.setAddNewlineToHeadAndBody(false);
+        cleanerProperties.setUseCdataFor("script,style,altscript");
         this.cleaner = new HtmlCleaner(cleanerProperties);
         this.serializer = new SimpleXmlSerializer(cleaner.getProperties());
 
-        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n// Comment \nalert(\"Hello World\")\n //\n/*]]>*/</script>", 
+        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n// Comment \nalert(\"Hello World\")\n //\n/*]]>*/</script>",
         "<script type=\"text/javascript\">// Comment \nalert(\"Hello World\")\n //\n</script>");
-        
-        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\nalert(\"Hello World\")\n/*]]>*/</script>", 
+
+        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\nalert(\"Hello World\")\n/*]]>*/</script>",
         "<script type=\"text/javascript\"><![CDATA[\nalert(\"Hello World\")\n]]></script>");
-        
-        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n//\nalert(\"Hello World\")\n// \n/*]]>*/</script>", 
+
+        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n//\nalert(\"Hello World\")\n// \n/*]]>*/</script>",
             "<script type=\"text/javascript\"><![CDATA[\n//\nalert(\"Hello World\")\n// \n]]></script>");
-        
-        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n//\nalert(\"Hello World\")\n// \n/*]]>*/</script>", 
+
+        assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n//\nalert(\"Hello World\")\n// \n/*]]>*/</script>",
         "<script type=\"text/javascript\">//<![CDATA[\nalert(\"Hello World\")\n// ]]></script>");
 
         assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n"
@@ -155,11 +156,12 @@ public class CDATATest extends AbstractHtmlCleanerTest {
                 + "}\n"
                 + "// ]]>\n"
                 + "</script>");
-        
+
         assertHTML("<script>/*<![CDATA[*/\n<>\n/*]]>*/</script>", "<script><></script>");
 
+        assertHTML("<altscript>/*<![CDATA[*/\n<>\n/*]]>*/</altscript>", "<altscript><></altscript>");
     }
-    
+
     //
     // This is a specific test over at XWiki that we currently don't pass
     //
@@ -172,37 +174,41 @@ public class CDATATest extends AbstractHtmlCleanerTest {
         cleanerProperties.setOmitDoctypeDeclaration(false);
         cleanerProperties.setIgnoreQuestAndExclam(false);
         cleanerProperties.setAddNewlineToHeadAndBody(false);
+        cleanerProperties.setUseCdataFor("script,style,altscript");
         this.cleaner = new HtmlCleaner(cleanerProperties);
         this.serializer = new SimpleXmlSerializer(cleaner.getProperties());
-        assertHTML("<script>/*<![CDATA[*/\n<>\n/*]]>*/</script>", "<script>&lt;&gt;</script>");    	
+        assertHTML("<script>/*<![CDATA[*/\n<>\n/*]]>*/</script>", "<script>&lt;&gt;</script>");
+        assertHTML("<altscript>/*<![CDATA[*/\n<>\n/*]]>*/</altscript>", "<altscript>&lt;&gt;</altscript>");
     }
-    
+
     @Test
     public void removeCDATA() throws IOException{
         CleanerProperties cleanerProperties = new CleanerProperties();
         cleanerProperties.setOmitCdataOutsideScriptAndStyle(true);
         cleanerProperties.setAddNewlineToHeadAndBody(false);
+        cleanerProperties.setUseCdataFor("script,style,altscript");
         cleaner = new HtmlCleaner(cleanerProperties);
         serializer = new SimpleXmlSerializer(cleaner.getProperties());
-        
+
         // Verify that CDATA not inside SCRIPT or STYLE elements are considered comments in HTML and thus stripped
         // when cleaned.
         assertHTML("<p></p>", "<p><![CDATA[&]]></p>");
         assertHTML("<p>&amp;&amp;</p>", "<p>&<![CDATA[&]]>&</p>");
+        assertHTML("<noaltscript />", "<noaltscript><![CDATA[&]]></noaltscript>");
     }
-    
+
     /**
      * Using the default setup, we should strip out CData outside
      * of script and style tags.
      */
     @Test
     public void CDATAinthewrongplace(){
-    	
+
         CleanerProperties cleanerProperties = new CleanerProperties();
         cleanerProperties.setIgnoreQuestAndExclam(true);
 
         cleaner = new HtmlCleaner(cleanerProperties);
-    	
+
     	String testData = ""
         	+ "<p>"
         	+ "<![CDATA[\n"

@@ -153,8 +153,7 @@ public class DomSerializer {
      */
     protected boolean dontEscape(Element element) {
         // make sure <script src=..></script> doesn't get turned into <script src=..><[CDATA[]]></script>
-        // TODO check for blank content as well.
-        return props.isUseCdataForScriptAndStyle() && isScriptOrStyle(element) && !element.hasChildNodes();
+        return props.isUseCdataFor(element.getNodeName()) && (!element.hasChildNodes() || element.getTextContent() == null || element.getTextContent().trim().length() == 0);
     }
     
     protected String outputCData(CData cdata){
@@ -181,7 +180,7 @@ public class DomSerializer {
                 	//
                 	// Only include CData inside Script and Style tags
                 	//
-                	if (isScriptOrStyle(element)){
+                	if (props.isUseCdataFor(element.getNodeName())){
                 		element.appendChild(document.createCDATASection(outputCData((CData)item)));
                 	}
                 } else if (item instanceof ContentNode) {

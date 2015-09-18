@@ -60,6 +60,7 @@ public class HtmlCleanerForAnt extends org.apache.tools.ant.Task {
     private String outputtype = "simple";
     private boolean advancedxmlescape = true;
     private boolean usecdata = true;
+    private String usecdatafor = "script,style";
     private boolean specialentities = true;
     private boolean unicodechars = true;
     private boolean omitunknowntags = false;
@@ -116,6 +117,10 @@ public class HtmlCleanerForAnt extends org.apache.tools.ant.Task {
 
     public void setUsecdata(boolean usecdata) {
         this.usecdata = usecdata;
+    }
+    
+    public void setUsecdatafor(String usecdatafor) {
+    	this.usecdatafor = usecdatafor;
     }
 
     public void setSpecialentities(boolean specialentities) {
@@ -224,6 +229,7 @@ public class HtmlCleanerForAnt extends org.apache.tools.ant.Task {
         CleanerProperties props = cleaner.getProperties();
 
         props.setAdvancedXmlEscape(this.advancedxmlescape);
+        props.setUseCdataFor(this.usecdatafor);
         props.setUseCdataForScriptAndStyle(this.usecdata);
         props.setTranslateSpecialEntities(this.specialentities);
         props.setRecognizeUnicodeChars(this.unicodechars);

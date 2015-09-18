@@ -38,6 +38,7 @@
 package org.htmlcleaner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -64,7 +65,8 @@ public class CleanerProperties implements HtmlModificationListener{
      * If this parameter is set to true, ampersand sign (&) that proceeds valid XML character sequences (&XXX;) will not be escaped with &amp;XXX;
      */
     private boolean advancedXmlEscape;
-    private boolean useCdataForScriptAndStyle;
+    private String useCdataFor;
+    private List<String> useCdataForList;
     private boolean translateSpecialEntities;
     private boolean recognizeUnicodeChars;
     private boolean omitUnknownTags;
@@ -160,11 +162,37 @@ public class CleanerProperties implements HtmlModificationListener{
     }
 
     public boolean isUseCdataForScriptAndStyle() {
-        return useCdataForScriptAndStyle;
+    	return isUseCdataFor("script") && isUseCdataFor("style");
     }
 
     public void setUseCdataForScriptAndStyle(boolean useCdataForScriptAndStyle) {
-        this.useCdataForScriptAndStyle = useCdataForScriptAndStyle;
+    	if (useCdataForScriptAndStyle)
+    		setUseCdataFor("script,style");
+    	else
+    		setUseCdataFor("");
+    }
+    
+    public void setUseCdataFor(String useCdataFor) {
+    	if (useCdataFor != null) {
+    		this.useCdataFor = useCdataFor;
+    		this.useCdataForList = Arrays.asList(useCdataFor.toLowerCase().split(","));
+    	} else {
+    		this.useCdataFor = "";
+    		this.useCdataForList = null;
+    	}
+    }
+
+
+    
+    public String getUseCdataFor() {
+    	return this.useCdataFor;
+    }
+    
+    public boolean isUseCdataFor(String useCdataFor) {
+    	if (useCdataForList != null && useCdataFor != null)
+    		return useCdataForList.contains(useCdataFor.toLowerCase());
+    	else
+    		return false;
     }
 
     public boolean isTranslateSpecialEntities() {
@@ -462,7 +490,7 @@ public class CleanerProperties implements HtmlModificationListener{
 
     /**
      * advancedXmlEscape = true;
-     * useCdataForScriptAndStyle = true;
+     * setUseCdataFor("script,style");
      * translateSpecialEntities = true;
      * recognizeUnicodeChars = true;
      * omitUnknownTags = false;
@@ -491,7 +519,7 @@ public class CleanerProperties implements HtmlModificationListener{
      */
     public void reset() {
         advancedXmlEscape = true;
-        useCdataForScriptAndStyle = true;
+        setUseCdataFor("script,style");
         translateSpecialEntities = true;
         recognizeUnicodeChars = true;
         omitUnknownTags = false;

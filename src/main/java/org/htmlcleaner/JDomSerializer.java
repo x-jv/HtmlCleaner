@@ -156,8 +156,7 @@ public class JDomSerializer {
                 } else if (item instanceof ContentNode) {
                     String nodeName = element.getName();
                     String content = item.toString();
-                    boolean specialCase = props.isUseCdataForScriptAndStyle()
-                            && ("script".equalsIgnoreCase(nodeName) || "style".equalsIgnoreCase(nodeName));
+                    boolean specialCase = props.isUseCdataFor(nodeName);
                     if (escapeXml && !specialCase) {
                         content = Utils.escapeXml(content, props, true);
                     }

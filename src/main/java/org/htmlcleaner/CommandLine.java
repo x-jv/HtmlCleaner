@@ -123,6 +123,7 @@ public class CommandLine {
             System.err.println("    outputtype=simple* | compact | browser-compact | pretty");
             System.err.println("    advancedxmlescape=true* | false");
             System.err.println("    usecdata=true* | false");
+            System.err.println("    usecdatafor=<string value> [script,style]");
             System.err.println("    specialentities=true* | false");
             System.err.println("    unicodechars=true* | false");
             System.err.println("    omitunknowntags=true | false*");
@@ -163,6 +164,7 @@ public class CommandLine {
         String outputType = getArgValue(args, "outputtype", "");
         String advancedXmlEscape = getArgValue(args, "advancedxmlescape", "");
         String useCData = getArgValue(args, "usecdata", "");
+        String useCDataFor = getArgValue(args, "usecdatafor", "");
         String translateSpecialEntities = getArgValue(args, "specialentities", "");
         String unicodeChars = getArgValue(args, "unicodechars", "");
         String omitUnknownTags = getArgValue(args, "omitunknowntags", "");
@@ -223,9 +225,13 @@ public class CommandLine {
         if ( !"".equals(advancedXmlEscape) ) {
             props.setAdvancedXmlEscape( toBoolean(advancedXmlEscape) );
         }
-
-        if ( !"".equals(useCData) ) {
+        
+        if ( !"".equals(useCData) && "".equals(useCDataFor) ) {
             props.setUseCdataForScriptAndStyle( toBoolean(useCData) );
+        }
+        
+        if ( !"".equals(useCDataFor) ) {
+        	props.setUseCdataFor( useCDataFor );
         }
 
         if ( !"".equals(translateSpecialEntities) ) {
