@@ -91,8 +91,7 @@ public class Html5TagProvider implements ITagInfoProvider {
 		// MathML tags
 		tagInfo = new TagInfo("math", ContentType.all, BelongsTo.BODY, false,
 				false, false, CloseTag.required, Display.block);
-		tagInfo.defineCloseBeforeCopyInsideTags("math,"
-				+ CLOSE_BEFORE_COPY_INSIDE_TAGS);
+		tagInfo.defineCloseBeforeCopyInsideTags(CLOSE_BEFORE_COPY_INSIDE_TAGS);
 		tagInfo.defineCloseBeforeTags("math," + CLOSE_BEFORE_TAGS);
 		this.put("math", tagInfo);
 

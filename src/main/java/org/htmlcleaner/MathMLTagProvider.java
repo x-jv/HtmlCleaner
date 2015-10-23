@@ -150,8 +150,7 @@ public class MathMLTagProvider {
 	   tagInfo = new TagInfo("mtr", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);
 	   tagInfo.defineCloseBeforeTags(CLOSE_BEFORE_TAGS);
 	   tagInfo.defineAllowedChildrenTags("mtd,mlabeledtr");
-	   tagInfo.defineRequiredEnclosingTags("body");
-	   tagInfo.defineFatalTags("mtable");
+	   tagInfo.defineRequiredEnclosingTags("mtable");
 	   this.put("mtr", tagInfo,tagInfoMap);
 	   
 	   tagInfo = new TagInfo("mtd", ContentType.all, BelongsTo.BODY, false, false, false, CloseTag.required, Display.block);

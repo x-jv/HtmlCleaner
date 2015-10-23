@@ -10,6 +10,29 @@ import org.junit.Test;
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
 	
 
+	/**
+	 * This is to test issue #157
+	 * @throws IOException
+	 */
+	@Test
+	public void math() throws IOException{
+		String initial = "<math><math></math></math>";
+		String expected = "<html><head /><body><math></math><math></math></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+		cleaner.getProperties().setNamespacesAware(true);
+        TagNode cleaned = cleaner.clean(initial);
+        String output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+        
+		initial = "<mtable><mtr></mtr></mtable>";
+		expected = "<html><head /><body><mtable><mtr></mtr></mtable></body></html>";
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+		cleaner.getProperties().setNamespacesAware(true);
+        cleaned = cleaner.clean(initial);
+        output = serializer.getAsString(cleaned);
+        assertEquals(expected, output);	
+	}
+	
 	
 	/**
 	 * This is to test issue #131
