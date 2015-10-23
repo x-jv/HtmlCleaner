@@ -349,24 +349,33 @@ public class HtmlTokenizer {
                 ++i;
             } else if (entityStart != -1) {
                 if (_saved.charAt(i) == ';') {
-                    SpecialEntity entity;
+                    int entityValue = -1;
                     if (numericEntity) {
                         try {
-                            entity = entities.getSpecialEntityByUnicode(Integer.parseInt(
+                            entityValue = Integer.parseInt(
                                     _saved.substring(
                                             entityStart + (hexEntity ? 3 : 2),
                                             i
                                     ),
                                     hexEntity ? 16 : 10
-                            ));
+                            );
                         } catch (NumberFormatException e) {
-                            entity = null;
+                            entityValue = -1;
                         }
+                        
+                    	SpecialEntity entity = entities.getSpecialEntityByUnicode(entityValue);
+                    	if(entity != null)
+                    		entityValue = entity.intValue();
+                    	else if(!props.isRecognizeUnicodeChars())
+                    		entityValue = -1;
                     } else {
-                        entity = entities.getSpecialEntity(_saved.substring(entityStart + 1, i));
+                    	SpecialEntity entity = entities.getSpecialEntity(_saved.substring(entityStart + 1, i));
+                    	if(entity != null)
+                    		entityValue = entity.intValue();
                     }
-                    if (entity != null) {
-                        char[] decodedEntity = Character.toChars(entity.intValue());
+                    
+                    if (entityValue >= 0) {
+                        char[] decodedEntity = Character.toChars(entityValue);
                         _saved.replace(entityStart, i + 1, new String(decodedEntity));
                         length = _saved.length();
                         i = entityStart + decodedEntity.length;

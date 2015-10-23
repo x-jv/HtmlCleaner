@@ -85,4 +85,34 @@ public class SpecialEntitiesTest extends AbstractHtmlCleanerTest {
 		
 	}
 
+	/**
+	 * For ticket #130: make sure that unicode chars are deserialized correctly
+	 * @throws IOException 
+	 */
+	@Test
+	public void deserializeUnicode() throws IOException {
+		cleaner.getProperties().setDeserializeEntities(true);
+		cleaner.getProperties().setOmitDoctypeDeclaration(true);
+		cleaner.getProperties().setOmitXmlDeclaration(true);
+		cleaner.getProperties().setOmitHtmlEnvelope(true);
+		
+		StringBuilder input = new StringBuilder(), output = new StringBuilder();
+		for(char c=1; c<20; c++) {
+			input.append(String.format("&#x%x;", (int) c));
+			output.append(Character.toString(c));
+		}
+		
+		final String unescaped = input.toString();
+		final String escaped = output.toString();
+		
+		cleaner.getProperties().setRecognizeUnicodeChars(false);
+		TagNode node = cleaner.clean(unescaped);
+		ContentNode content = (ContentNode) node.getAllChildren().get(0);
+		assertEquals(unescaped, content.getContent());
+		
+		cleaner.getProperties().setRecognizeUnicodeChars(true);
+		node = cleaner.clean(unescaped);
+		content = (ContentNode) node.getAllChildren().get(0);
+		assertEquals(escaped, content.getContent());
+	}
 }
