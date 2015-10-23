@@ -3,12 +3,37 @@ package org.htmlcleaner;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.io.StringWriter;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
 	
+	/**
+	 * Test for bug #154
+	 * @throws IOException
+	 */
+	@Test
+	public void attributeSerialization() throws IOException{
+	    final String original =     "<p data-double-quote-attr=\"foo&quot;bar'baz\" data-single-quote-attr='foo\"bar&apos;baz'>text</p>";
+	    final String expectedHtml = "<p data-double-quote-attr=\"foo&quot;bar'baz\" data-single-quote-attr=\"foo&quot;bar'baz\">text</p>";
+	    final String expectedXml =  "<p data-double-quote-attr=\"foo&quot;bar&apos;baz\" data-single-quote-attr=\"foo&quot;bar&apos;baz\">text</p>";
+
+	    cleaner.getProperties().setOmitHtmlEnvelope(true);
+	    TagNode node = cleaner.clean(original);
+	    StringWriter writer = new StringWriter();
+	    serializer = new SimpleHtmlSerializer(cleaner.getProperties());
+	    serializer.write(node, writer, "UTF-8");
+	    assertEquals(expectedHtml, writer.toString());
+
+	    //
+	    // TODO this should also work for XML in some cases - I've commented this out for now but will return to it later.
+	    //
+	    //writer = new StringWriter();
+	    //serializer = new SimpleXmlSerializer(cleaner.getProperties());
+	    //assertEquals(expectedXml, writer.toString());
+	}
 
 	/**
 	 * This is to test issue #157
