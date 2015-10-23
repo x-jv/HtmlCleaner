@@ -93,13 +93,23 @@ public class DomSerializer {
         //
         // Where a DOCTYPE is supplied in the input, ensure that this is in the output DOM. See issue #27
         //
+        // Note that we may want to fix incorrect DOCTYPEs in future; there are some fairly
+        // common patterns for errors with the older HTML4 doctypes.
+        //
         if (rootNode.getDocType() != null){
         	String qualifiedName = rootNode.getDocType().getPart1();
         	String publicId = rootNode.getDocType().getPublicId();
         	String systemId = rootNode.getDocType().getSystemId();
+        	
+        	//
+        	// If there is no qualified name, set it to html. See bug #153.
+        	//
+        	if (qualifiedName == null) qualifiedName = "html";
+        	
             DocumentType documentType = impl.createDocumentType(qualifiedName, publicId, systemId);
+            
             //
-            // While the qualfiied name is "HTML" for some DocTypes, we want the actual document root name to be "html". See bug #116
+            // While the qualified name is "HTML" for some DocTypes, we want the actual document root name to be "html". See bug #116
             //
             if (qualifiedName.equals("HTML")) qualifiedName = "html";
             document = impl.createDocument(rootNode.getNamespaceURIOnPath(""), qualifiedName, documentType);

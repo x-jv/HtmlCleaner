@@ -59,7 +59,7 @@ public class SerializationTest extends TestCase {
     public void testDomSerializerHtml4() throws ParserConfigurationException, IOException, TransformerException {
     	
         TagNode node = cleaner.clean(new File("src/test/resources/test4.html"), "UTF-8");
-
+System.out.println(node.getDocType().getContent());
         final Document dom = new DomSerializer(properties, true).createDOM(node);
         
         assertEquals("HTML", dom.getDoctype().getName());
