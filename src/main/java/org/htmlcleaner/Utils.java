@@ -173,18 +173,70 @@ public class Utils {
 			            } else {
 			                result.append(transResCharsToNCR ? getAmpNcr() : "&amp;");
 			            }
+					} 
+
 			        //
 			        // If the serializer used to output is HTML rather than XML, and we have a match to a
 			        // known HTML entity such as &nbsp;, we output it as-is (see bug #118)
 			        //
-					} else if ((isHtmlOutput &&
-						(code = SpecialEntities.INSTANCE.getSpecialEntity(s.substring(i, i+Math.min(10, len-i)))) != null)){
-						result.append("&");
-    				} else {
+
+					else if (isHtmlOutput)
+					{
+						// we have an ampersand and that's all we know so far
+					
+						code = SpecialEntities.INSTANCE.getSpecialEntity(s.substring(i, i+Math.min(10, len-i)));
+					
+						if ( code != null )
+						{
+							// It is a special entity like &nbsp; - leave it in place.
+					
+							result.append(code.getEscapedValue());
+					
+							// advance i by the length of the entity so we won't process each following character
+							// key length excludes & and ; and we add 1 to skip the ;
+							i += code.getKey().length()+1;
+						}
+						else if ( (i < len-1) && (s.charAt(i+1) == '#') )
+						{
+							// if the next char is a # then convert entity number to entity name (if possible)
+					
+							i = convert_To_Entity_Name(s, false, false, false, result, i+2);
+					
+							// assuming 'i' is being incremented correctly... not verified.
+						}
+						else
+						{
+							// html output but not an entity name or number
+					
+							result.append(transResCharsToNCR ? getAmpNcr() : "&amp;");
+						}
+					} else {
     				    result.append(transResCharsToNCR ? getAmpNcr() : "&amp;");
     				}
     			} else if ((code = SpecialEntities.INSTANCE.getSpecialEntityByUnicode(ch)) != null ) {
-    			    result.append(transResCharsToNCR ? code.getDecimalNCR() : code.getEscaped(isDomCreation));
+
+					// It's a special entity character itself
+					
+					if ( isHtmlOutput )
+					{
+						if ( "apos".equals(code.getKey()) )
+						{
+							// leave the apostrophes alone for html output
+							// this is a cheap hack to avoid removing apostrophe from the special entities list for html output
+							result.append(ch);
+						}
+						else
+						{
+							// output as entity name, or as literal character if isDomCreation
+							result.append(isDomCreation? code.getHtmlString() : code.getEscapedValue());
+						}
+					}
+					else
+					{
+						// output as entity number, or as literal character if isDomCreation
+						result.append(transResCharsToNCR ? code.getDecimalNCR() : code.getEscaped(isDomCreation));
+					}
+
     			} else {
     				result.append(ch);
     			}
@@ -207,6 +259,82 @@ public class Utils {
     }
 
     private static final Pattern ASCII_CHAR = Pattern.compile("\\p{Print}");
+
+    /**
+     * @param s
+     * @param domCreation
+     * @param recognizeUnicodeChars
+     * @param translateSpecialEntitiesToNCR 
+     * @param result
+     * @param i
+     * @return
+     */
+
+	// Converts Numeric Character References (NCRs) (Dec or Hex) to Character Entity References
+	// ie. &#8364;	to &euro; 
+	// This is almost a copy of convertToUnicode
+	// only called in the case of isHtmlOutput when we see &# in the input stream
+
+    private static int convert_To_Entity_Name(String s, boolean domCreation, boolean recognizeUnicodeChars, boolean translateSpecialEntitiesToNCR, StringBuilder result, int i) {
+        StringBuilder unicode = new StringBuilder();
+        int charIndex = extractCharCode(s, i, true, unicode);
+        if (unicode.length() > 0) {
+        	try {
+        	    boolean isHex = unicode.substring(0,1).equals("x");
+        	    
+        	    //
+        	    // Get the unicode character and code point
+        	    //
+        	    int codePoint = -1;
+        	    char[] unicodeChar = null;    
+        	    if (isHex){
+        	    	codePoint = Integer.parseInt(unicode.substring(1), 16);
+        	    	unicodeChar = Character.toChars(codePoint);
+        	    } else {
+        	    	codePoint = Integer.parseInt(unicode.toString());
+        	    	unicodeChar =  Character.toChars(codePoint);
+        	    }
+        	    
+        	    SpecialEntity specialEntity = SpecialEntities.INSTANCE.getSpecialEntityByUnicode(codePoint);
+                if (unicodeChar.length == 1 && unicodeChar[0] == 0) {
+                    // null character &#0Peanut for example
+                    // just consume character &
+                    result.append("&amp;");
+                } 
+				else if ( specialEntity != null )
+				{
+					if ( specialEntity.isHtmlSpecialEntity() )
+					{
+						result.append( domCreation? specialEntity.getHtmlString() : specialEntity.getEscapedValue() );
+					}
+					else
+					{
+						result.append(domCreation? specialEntity.getHtmlString():
+						(translateSpecialEntitiesToNCR? (isHex? specialEntity.getHexNCR(): specialEntity.getDecimalNCR()) : 
+						specialEntity.getHtmlString()));
+					}
+                } else if ( recognizeUnicodeChars ) {
+                    // output unicode characters as their actual byte code with the exception of characters that have special xml meaning.
+                    result.append( String.valueOf(unicodeChar));
+                } else if ( ASCII_CHAR.matcher(new String(unicodeChar)).find()) {
+                    // ascii printable character. this fancy escaping might be an attempt to slip in dangerous characters (i.e. spelling out <script> )
+                    // by converting to printable characters we can more easily detect such attacks.
+                    result.append(String.valueOf(unicodeChar));
+                } else {
+                    // unknown unicode value - output as-is
+        			result.append( "&#").append(unicode).append(";" );
+        		}
+        	} catch (NumberFormatException e) {
+        	    // should never happen now
+        		result.append("&amp;#").append(unicode).append(";" );
+        	}
+        } else {
+        	result.append("&amp;");
+        }
+        return charIndex;
+    }
+
+
     /**
      * @param s
      * @param domCreation
