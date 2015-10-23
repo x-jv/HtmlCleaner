@@ -762,7 +762,9 @@ public class Html5TagProvider implements ITagInfoProvider {
 				true, false, CloseTag.required, Display.none);
 		this.put("title", tagInfo);
 
-		tagInfo = new TagInfo("style", ContentType.text, BelongsTo.HEAD, false,
+		// As of HTML5, style can be used in <body> where it has an @scoped attribute
+		// TODO add attribute rules
+		tagInfo = new TagInfo("style", ContentType.text, BelongsTo.HEAD_AND_BODY, false,
 				false, false, CloseTag.required, Display.none);
 		this.put("style", tagInfo);
 

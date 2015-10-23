@@ -350,6 +350,7 @@ public class PropertiesTest extends TestCase {
     public void testOmitHtmlEnvelope() throws IOException {
         HtmlCleaner cleaner = new HtmlCleaner();
         CleanerProperties properties = cleaner.getProperties();
+        properties.setHtmlVersion(4);
         properties.setNamespacesAware(false);
         properties.setAddNewlineToHeadAndBody(false);
         String xmlString;
@@ -360,7 +361,31 @@ public class PropertiesTest extends TestCase {
         assertTrue(xmlString.indexOf("</body></html>") < 0);
         properties.setOmitHtmlEnvelope(false);
         xmlString = getXmlString(cleaner, properties);
+        System.out.println(xmlString);
         assertTrue(xmlString, xmlString.indexOf("<html><head>") >= 0);
+        xmlString = getXmlString(cleaner, properties);
+        assertTrue(xmlString, xmlString.indexOf("</body></html>") >= 0);
+    }
+    
+    /**
+     * @throws IOException
+     */
+    public void testOmitHtml5Envelope() throws IOException {
+        HtmlCleaner cleaner = new HtmlCleaner();
+        CleanerProperties properties = cleaner.getProperties();
+        properties.setHtmlVersion(5);
+        properties.setNamespacesAware(false);
+        properties.setAddNewlineToHeadAndBody(false);
+        String xmlString;
+        properties.setOmitHtmlEnvelope(true);
+        xmlString = getXmlString(cleaner, properties);
+        assertTrue(xmlString.indexOf("<html><head>") < 0);
+        xmlString = getXmlString(cleaner, properties);
+        assertTrue(xmlString.indexOf("</body></html>") < 0);
+        properties.setOmitHtmlEnvelope(false);
+        xmlString = getXmlString(cleaner, properties);
+        System.out.println(xmlString);
+        assertTrue(xmlString, xmlString.indexOf("<html><head />") >= 0);
         xmlString = getXmlString(cleaner, properties);
         assertTrue(xmlString, xmlString.indexOf("</body></html>") >= 0);
     }

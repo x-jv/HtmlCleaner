@@ -10,6 +10,24 @@ import org.junit.Test;
 
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
 	
+
+	/**
+	 * Test for bug #156
+	 * @throws IOException
+	 */
+	@Test
+	public void testStyleIsNotRemoved() throws IOException{
+		final String original = "<div><style type=\"text/css\">h1 {color:black;}</style>42</div>";
+		final String expected = "<div><style type=\"text/css\">h1 {color:black;}</style>42</div>";
+
+		cleaner.getProperties().setOmitHtmlEnvelope(true);
+		TagNode node = cleaner.clean(original);
+		StringWriter writer = new StringWriter();
+		serializer = new SimpleHtmlSerializer(cleaner.getProperties());
+		serializer.write(node, writer, "UTF-8");
+		assertEquals(expected, writer.toString());
+	}
+	
 	/**
 	 * Test for bug #154
 	 * @throws IOException
