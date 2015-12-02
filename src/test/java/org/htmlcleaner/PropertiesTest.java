@@ -361,7 +361,6 @@ public class PropertiesTest extends TestCase {
         assertTrue(xmlString.indexOf("</body></html>") < 0);
         properties.setOmitHtmlEnvelope(false);
         xmlString = getXmlString(cleaner, properties);
-        System.out.println(xmlString);
         assertTrue(xmlString, xmlString.indexOf("<html><head>") >= 0);
         xmlString = getXmlString(cleaner, properties);
         assertTrue(xmlString, xmlString.indexOf("</body></html>") >= 0);
@@ -384,7 +383,6 @@ public class PropertiesTest extends TestCase {
         assertTrue(xmlString.indexOf("</body></html>") < 0);
         properties.setOmitHtmlEnvelope(false);
         xmlString = getXmlString(cleaner, properties);
-        System.out.println(xmlString);
         assertTrue(xmlString, xmlString.indexOf("<html><head />") >= 0);
         xmlString = getXmlString(cleaner, properties);
         assertTrue(xmlString, xmlString.indexOf("</body></html>") >= 0);
