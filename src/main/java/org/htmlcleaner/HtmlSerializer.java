@@ -82,6 +82,7 @@ public abstract class HtmlSerializer extends Serializer {
             if (!nsAware && Utils.getXmlNSPrefix(attName) != null ) {
                 attName = Utils.getXmlName(attName);
             }
+            if (!(nsAware && attName.equalsIgnoreCase("xmlns")))
             writer.write(" " + attName + "=\"" + escapeText(entry.getValue()) + "\"");
         }
 
