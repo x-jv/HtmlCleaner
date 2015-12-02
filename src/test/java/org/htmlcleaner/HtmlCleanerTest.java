@@ -9,8 +9,70 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
-	
 
+	/**
+
+	 * @throws IOException 
+	 */
+    @Test
+    @Ignore // Still an issue with this one - basically self-closing tags don't seem to close properly
+    public void testSelfClosingTagNonHtml() throws IOException
+    {
+        final String input = "<html xmlns=\"FOO\"><head></head><body><table><tbody><tr><td></td></tr></tbody></table><BR /><div></div></body></html>";
+    	final String expected = "<html xmlns=\"FOO\"><head></head><body><table><tbody><tr><td></td></tr></tbody></table><BR></BR><div></div></body></html>";
+        TagNode cleaned = new HtmlCleaner().clean(input);
+		StringWriter writer = new StringWriter();
+		serializer = new SimpleHtmlSerializer(cleaner.getProperties());
+		serializer.write(cleaned, writer, "UTF-8");
+		assertEquals(expected, writer.toString());
+    }
+    
+	/**
+
+	 * @throws IOException 
+	 */
+    @Test
+    public void testSelfClosingTag() throws IOException
+    {
+        final String input = "<html><head></head><body><table><tbody><tr><td></td></tr></tbody></table><BR /><div></div></body></html>";
+    	final String expected = "<html><head></head><body><table><tbody><tr><td></td></tr></tbody></table><br /><div></div></body></html>";
+        TagNode cleaned = new HtmlCleaner().clean(input);
+		StringWriter writer = new StringWriter();
+		serializer = new SimpleHtmlSerializer(cleaner.getProperties());
+		serializer.write(cleaned, writer, "UTF-8");
+		assertEquals(expected, writer.toString());
+    }
+    
+	/**
+	 * Test for bug #158
+	 * @throws IOException 
+	 */
+    @Test
+    public void testNPE() throws IOException
+    {
+        final String HTML = "<html xmlns=\"foo\" >"
+                + "<head>"
+                + "</head>"
+                + "<body>"
+                + "<table>"
+                + "<tr>"
+                + "<td>"
+                + "<br></br>"
+                + "</td>"   
+                + "</tr>"
+                + "</table>"
+                + "<div>"
+                + "</div>"
+                + "</body>"
+                + "</html>";
+        final String expected = "<html xmlns=\"foo\"><head></head><body><table><tr><td><br /></td></tr></table><div></div></body></html>";
+        TagNode cleaned = new HtmlCleaner().clean(HTML);
+		StringWriter writer = new StringWriter();
+		serializer = new SimpleHtmlSerializer(cleaner.getProperties());
+		serializer.write(cleaned, writer, "UTF-8");
+		assertEquals(expected, writer.toString());
+    }
+    
 	/**
 	 * Test for bug #156
 	 * @throws IOException
