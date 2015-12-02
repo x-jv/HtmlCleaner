@@ -214,6 +214,10 @@ public class HtmlCleaner {
         private void removeTag(String tagName) {
             ListIterator<TagPos> it = list.listIterator( list.size() );
             while ( it.hasPrevious() ) {
+            	if (Thread.currentThread().isInterrupted()) {
+            		handleInterruption();
+                	break;
+                }
                 TagPos currTagPos = it.previous();
                 if (tagName.equals(currTagPos.name)) {
                     it.remove();
@@ -239,6 +243,10 @@ public class HtmlCleaner {
                 TagInfo fatalInfo = getTagInfoProvider().getTagInfo(tagName);
 
                 while (it.hasPrevious()) {
+                	if (Thread.currentThread().isInterrupted()) {
+                		handleInterruption();
+                    	return null;
+                    }
                     TagPos currTagPos = it.previous();
                     if (tagName.equals(currTagPos.name)) {
                         return currTagPos;
@@ -263,6 +271,10 @@ public class HtmlCleaner {
             if ( !isEmpty() ) {
                 ListIterator<TagPos> it = list.listIterator( list.size() );
                 while ( it.hasPrevious() ) {
+                	if (Thread.currentThread().isInterrupted()) {
+                		handleInterruption();
+                    	return null;
+                    }
                     result = it.previous();
                     if ( result.info == null || result.info.allowsAnything() ) {
                     	if (prev != null) {
@@ -446,18 +458,43 @@ public class HtmlCleaner {
 
         HtmlTokenizer htmlTokenizer = new HtmlTokenizer(this, reader, cleanTimeValues);
 
-		htmlTokenizer.start();
+        htmlTokenizer.start();
+		
+		if (Thread.currentThread().isInterrupted()) {
+    		handleInterruption();
+        	return null;
+        }
 
         List nodeList = htmlTokenizer.getTokenList();
         closeAll(nodeList, cleanTimeValues);
+        
+        if (Thread.currentThread().isInterrupted()) {
+    		handleInterruption();
+        	return null;
+        }
 
         createDocumentNodes(nodeList, cleanTimeValues);
+        
+        if (Thread.currentThread().isInterrupted()) {
+    		handleInterruption();
+        	return null;
+        }
+        
         calculateRootNode( cleanTimeValues, htmlTokenizer.getNamespacePrefixes() );
+        
+        if (Thread.currentThread().isInterrupted()) {
+    		handleInterruption();
+        	return null;
+        }
 
         // Some transitions on resulting html require us to have the tag tree structure.
         // i.e. if we want to clear insignificant <br> tags. Thus this place is best for
         // marking nodes to be pruned.
         while(markNodesToPrune(nodeList, cleanTimeValues)) {
+        	if (Thread.currentThread().isInterrupted()) {
+        		handleInterruption();
+            	return null;
+            }
 			// do them all
 		}
 
@@ -465,6 +502,10 @@ public class HtmlCleaner {
         if (cleanTimeValues.pruneNodeSet != null && !cleanTimeValues.pruneNodeSet.isEmpty() ) {
             Iterator<TagNode> iterator = cleanTimeValues.pruneNodeSet.iterator();
             while (iterator.hasNext()) {
+            	if (Thread.currentThread().isInterrupted()) {
+            		handleInterruption();
+                	return null;
+                }
                 TagNode tagNode = iterator.next();
                 TagNode parent = tagNode.getParent();
                 if (parent != null) {
@@ -541,6 +582,10 @@ public class HtmlCleaner {
         if (properties.isNamespacesAware() && namespacePrefixes != null) {
             Iterator<String> iterator = namespacePrefixes.iterator();
             while (iterator.hasNext()) {
+            	if (Thread.currentThread().isInterrupted()) {
+            		handleInterruption();
+                	return;
+                }
                 String prefix = iterator.next();
                 String xmlnsAtt = "xmlns:" + prefix;
                 //
@@ -639,6 +684,10 @@ public class HtmlCleaner {
     	ListIterator it = getOpenTags(cleanTimeValues).list.listIterator( getOpenTags(cleanTimeValues).list.size() );
     	while ( it.hasPrevious() ) {
     		TagPos currTagPos = (TagPos) it.previous();
+    		if (Thread.currentThread().isInterrupted()) {
+        		handleInterruption();
+            	return currTagPos.position <= fatalTagPosition;
+            }
     		if (tag.isHigher(currTagPos.name)) {
     			return currTagPos.position <= fatalTagPosition;
     		}
@@ -670,14 +719,24 @@ public class HtmlCleaner {
 
     private void saveToLastOpenTag(List nodeList, Object tokenToAdd, CleanTimeValues cleanTimeValues) {
         TagPos last = getOpenTags(cleanTimeValues).getLastTagPos();
+        
+        //
+        // If we can simply ignore this token, then we remove it.
+        //
         if ( last != null && last.info != null && last.info.isIgnorePermitted() ) {
             return;
         }
 
+        //
+        // Find an open tag where the token can live
+        //
         TagPos rubbishPos = getOpenTags(cleanTimeValues).findTagToPlaceRubbish();
-        if (rubbishPos != null) {
+        if (rubbishPos != null){
     		TagNode startTagToken = (TagNode) nodeList.get(rubbishPos.position);
-			startTagToken.addItemForMoving(tokenToAdd);
+    		if (startTagToken != null) {
+    			startTagToken.addItemForMoving(tokenToAdd);
+    			return;
+    		}
         }
     }
 
@@ -711,24 +770,28 @@ public class HtmlCleaner {
 	 * @param nodeIterator
 	 */
 	void makeTree(List nodeList, ListIterator<BaseToken> nodeIterator, CleanTimeValues cleanTimeValues) {
-		
 		// process while not reach the end of the list
 	    while ( nodeIterator.hasNext() ) {
+	    	if (Thread.currentThread().isInterrupted()) {
+        		handleInterruption();
+            	return;
+            }
 	        BaseToken token = nodeIterator.next();
 
             if (token instanceof EndTagToken) {
 				EndTagToken endTagToken = (EndTagToken) token;
 				String tagName = endTagToken.getName();
                 TagInfo tag = getTagInfo(tagName, cleanTimeValues);
-
+                
 				if ( (tag == null && properties.isOmitUnknownTags()) && !isAllowedAsForeignMarkup(tagName,cleanTimeValues) || (tag != null && tag.isDeprecated() && properties.isOmitDeprecatedTags()) ) {
 				    //tag is either unknown or deprecated, so we just prune the end token out
 				    nodeIterator.set(null);
 				} else if ( tag != null && !tag.allowsBody() ) {
-				        //tag doesn't allow body, so end token is not needed
+				    //tag doesn't allow body, so end token is not needed
 					nodeIterator.set(null);
 				} else {
-				        //trying to find corresponding opened tag for the end token
+
+				    //trying to find corresponding opened tag for the end token
 					TagPos matchingPosition = getOpenTags(cleanTimeValues).findTag(tagName);
 
                     if (matchingPosition != null) {
@@ -788,6 +851,10 @@ public class HtmlCleaner {
                         			List<TagNode> tagNodes = (List<TagNode>) toReopen;
 
                         			for(TagNode n : tagNodes) {
+                        				if (Thread.currentThread().isInterrupted()) {
+                            	    		// TODO Interruption
+                                        	return;
+                                        }
                         				nodeIterator.add(n);
                         				makeTree(nodeList, nodeList.listIterator(nodeList.size()-1), cleanTimeValues);
                         			}
@@ -949,6 +1016,10 @@ public class HtmlCleaner {
 						ListIterator closedIt = closed.listIterator(closedCount);
 						List toBeCopied = new ArrayList();
 						while (closedIt.hasPrevious()) {
+							if (Thread.currentThread().isInterrupted()) {
+					    		// TODO Interruption
+				            	return;
+				            }
 							TagNode currStartToken = (TagNode) closedIt.previous();
 							if ( tag.isCopy(currStartToken.getName()) ) {
 								toBeCopied.add(0, currStartToken);
@@ -960,6 +1031,10 @@ public class HtmlCleaner {
 						if (toBeCopied.size() > 0) {
 							Iterator copyIt = toBeCopied.iterator();
 							while (copyIt.hasNext()) {
+								if (Thread.currentThread().isInterrupted()) {
+						    		// TODO Interruption
+					            	return;
+					            }
 								TagNode currStartToken = (TagNode) copyIt.next();
                                 if (!isCopiedTokenEqualToNextThreeCopiedTokens(currStartToken, nodeIterator)) {
                                     nodeIterator.add(currStartToken.makeCopy());
@@ -982,14 +1057,14 @@ public class HtmlCleaner {
                 	// if this open tag is not allowed inside last open tag, then it must be moved to the place where it can be
                 	//
                 	saveToLastOpenTag(nodeList, token, cleanTimeValues);
-                	nodeIterator.set(null);   		
+                    nodeIterator.set(null);                 		
                 } else if ( tag != null && !tag.allowsBody() ) {
                     // if it is known HTML tag but doesn't allow body, it is immediately closed
 					TagNode newTagNode = createTagNode(startTagToken);
                     addPossibleHeadCandidate(tag, newTagNode, cleanTimeValues);
                     nodeIterator.set(newTagNode);
-				// default case - just remember this open tag and go further
-                } else {
+    			// default case - just remember this open tag and go further
+                } else { 
                     getOpenTags(cleanTimeValues).addTag( tagName, nodeIterator.previousIndex() );
                 }
 			} else {
@@ -1094,6 +1169,10 @@ public class HtmlCleaner {
         // move all viable head candidates to head section of the tree
         Iterator headIterator = cleanTimeValues._headTags.iterator();
         while (headIterator.hasNext()) {
+        	if (Thread.currentThread().isInterrupted()) {
+        		handleInterruption();
+            	return;
+            }
         	TagNode headCandidateNode = (TagNode) headIterator.next();
 
             // check if this node is already inside a candidate for moving to head
@@ -1130,6 +1209,11 @@ public class HtmlCleaner {
 		boolean isListEnd = false;
 
 		while ( (toNode == null && !isListEnd) || (toNode != null && item != toNode) ) {
+			if (Thread.currentThread().isInterrupted()) {
+	    		// Interruption
+				handleInterruption();
+            	return closed;
+            }
 			if ( isStartToken(item) ) {
                 TagNode startTagToken = (TagNode) item;
                 closed.add(startTagToken);
@@ -1184,6 +1268,10 @@ public class HtmlCleaner {
     private void closeAll(List nodeList, CleanTimeValues cleanTimeValues) {
         TagPos firstTagPos = getOpenTags(cleanTimeValues).findFirstTagPos();
         for (TagPos pos : getOpenTags(cleanTimeValues).list) {
+        	if (Thread.currentThread().isInterrupted()) {
+        		handleInterruption();
+            	return;
+            }
             properties.fireHtmlError(true, (TagNode)nodeList.get(pos.position), ErrorType.UnclosedTag);
         }
         if (firstTagPos != null) {
@@ -1344,6 +1432,14 @@ public class HtmlCleaner {
 	}
 	private NestingState popNesting(CleanTimeValues cleanTimeValues) {
 		return cleanTimeValues.nestingStates.pop();
+	}
+	
+	/**
+	 * Called whenver the thread is interrupted. Currently this is a 
+	 * placeholder, but could hold cleanup methods and user interaction
+	 */
+	private void handleInterruption(){
+		
 	}
 
 }
