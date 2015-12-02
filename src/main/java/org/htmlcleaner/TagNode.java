@@ -198,7 +198,11 @@ public class TagNode extends TagToken implements HtmlNode {
     		// and add them to the set of processed keys
     		//
     		for (String key: attributes.keySet()){
-
+    			if (Thread.currentThread().isInterrupted()) {
+    	    		// Interruption: if the attributes.keySet() is large this loop will take a lot of time
+    				handleInterruption();
+                	return;
+                }
     			String keyToSet = key; // the key to set
     			String value = attributes.get(key); // the value to set
 
@@ -861,6 +865,14 @@ public class TagNode extends TagToken implements HtmlNode {
 			lowerCaseAttributes.put(key.toLowerCase(), attributes.get(key));
 		}
 		return lowerCaseAttributes;
+	}
+	
+	/**
+	 * Called whenver the thread is interrupted. Currently this is a 
+	 * placeholder, but could hold cleanup methods and user interaction
+	 */
+	private void handleInterruption(){
+		
 	}
 
 }
