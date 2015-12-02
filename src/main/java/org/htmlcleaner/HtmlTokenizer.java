@@ -419,6 +419,13 @@ public class HtmlTokenizer {
     	boolean isSpecialEmpty = true;
 
     	while ( !isAllRead() ) {
+    		if (Thread.currentThread().isInterrupted()) {
+    			this.handleInterruption();
+    			_tokenList.clear();
+    			_namespacePrefixes.clear();
+    			_reader.close();
+            	return;
+            }
     		// resets all the runtime values
     		_saved.delete(0, _saved.length());
     		_currentTagToken = null;
@@ -687,6 +694,11 @@ public class HtmlTokenizer {
      */
     private void tagAttributes() throws IOException {
         while( !isAllRead() && _asExpected && !isChar('>') && !startsWith("/>") ) {
+        	if (Thread.currentThread().isInterrupted()) {
+    	    	// Interruption: risk to take a lot of time in case of damaged file
+        		handleInterruption();
+            	return;
+            }
             skipWhitespaces();
             String attName = identifier();
 
@@ -944,5 +956,13 @@ public class HtmlTokenizer {
     public DoctypeToken getDocType() {
         return _docType;
     }
+    
+	/**
+	 * Called whenver the thread is interrupted. Currently this is a 
+	 * placeholder, but could hold cleanup methods and user interaction
+	 */
+	private void handleInterruption(){
+		
+	}
 
 }
