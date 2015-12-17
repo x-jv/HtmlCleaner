@@ -63,7 +63,7 @@ public class ContentNode extends BaseTokenImpl implements HtmlNode {
     }
 
     public void serialize(Serializer serializer, Writer writer) throws IOException {
-    	writer.write( content );
+    	writer.write( getContent() );
     }
 
     public boolean isBlank() {
