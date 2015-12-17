@@ -109,6 +109,13 @@ public class PrettyHtmlSerializer extends HtmlSerializer {
             } else {
                 String content = child.toString();
 
+                //
+                // Removed the trim function as this has the potential
+                // to cause issues with actual content without adding
+                // any value
+                //
+                
+                /*
                 // if first item trims it from left
                 if (isFirst) {
                 	content = Utils.ltrim(content);
@@ -118,6 +125,7 @@ public class PrettyHtmlSerializer extends HtmlSerializer {
                 if (!childrenIt.hasNext()) {
                 	content = Utils.rtrim(content);
                 }
+                */
 
                 if ( content.indexOf("\n") >= 0 || content.indexOf("\r") >= 0 ) {
                     return null;
@@ -187,6 +195,7 @@ public class PrettyHtmlSerializer extends HtmlSerializer {
                             }
                         }
                     } else if (child instanceof CommentNode) {
+
                         if (!lastWasNewLine && !preserveWhitespaces) {
                             writer.write("\n");
                             lastWasNewLine = false;
