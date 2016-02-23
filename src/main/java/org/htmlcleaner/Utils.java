@@ -50,6 +50,79 @@ import java.util.regex.Pattern;
  * Date: November, 2006.
  */
 public class Utils {
+	
+	/**
+	 * Removes the first newline and last newline (if present) of a string
+	 * @param str
+	 * @return
+	 */
+	static String bchomp(final String str){
+		return chomp(lchomp(str));
+	}
+	
+	/**
+	 * Removes the last newline (if present) of a string
+	 * @param str
+	 * @return
+	 */
+	static String chomp(final String str){
+		if (str.length() ==0) {
+			return str;
+		}
+
+		if (str.length() == 1) {
+			final char ch = str.charAt(0);
+			if (ch == '\r' || ch == '\n') {
+				return "";
+			}
+			return str;
+		}
+
+		int lastIdx = str.length() - 1;
+		final char last = str.charAt(lastIdx);
+
+		if (last == '\n') {
+			if (str.charAt(lastIdx - 1) == '\r') {
+				lastIdx--;
+			}
+		} else if (last != '\r') {
+			lastIdx++;
+		}
+		return str.substring(0, lastIdx);
+	}
+	
+	/**
+	 * Removes the first newline (if present) of a string
+	 * @param str
+	 * @return
+	 */
+	static String lchomp(final String str){
+		if (str.length() == 0) {
+			return str;
+		}
+
+		if (str.length() == 1) {
+			final char ch = str.charAt(0);
+			if (ch == '\r' || ch == '\n') {
+				return "";
+			}
+			return str;
+		}
+		
+		int firstIndex = 0;
+		
+		final char first = str.charAt(0);
+		if (first == '\n'){
+			firstIndex++;
+			if (str.charAt(1) == '\r') {
+				firstIndex++ ;
+			}
+		} else if (first != '\r') {
+			firstIndex = 0;
+		}
+		return str.substring(firstIndex, str.length());
+	}
+	
 
     /**
      * Reads content from the specified URL with specified charset into string
