@@ -67,10 +67,10 @@ public class DomSerializerTest extends AbstractHtmlCleanerTest {
     	assertEquals("script",         output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getNodeName());
 
     	// The content of the script tag should be CDATA
-    	assertEquals("#cdata-section", output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getChildNodes().item(2).getNodeName());
+    	assertEquals("#cdata-section", output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getChildNodes().item(1).getNodeName());
     	
     	// The value of the CDATA section should be as expected from the input
-    	String content = output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getChildNodes().item(2).getNodeValue();
+    	String content = output.getChildNodes().item(0).getChildNodes().item(1).getChildNodes().item(0).getChildNodes().item(1).getNodeValue();
     	assertEquals("\nfunction escapeForXML(origtext) {\n return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n .replace(/>/g,'&'+'gt;').replace(/'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');}\n", content);    	
     }
     

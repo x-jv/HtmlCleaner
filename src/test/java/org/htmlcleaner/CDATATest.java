@@ -139,7 +139,7 @@ public class CDATATest extends AbstractHtmlCleanerTest {
             "<script type=\"text/javascript\"><![CDATA[\n//\nalert(\"Hello World\")\n// \n]]></script>");
 
         assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n//\nalert(\"Hello World\")\n// \n/*]]>*/</script>",
-        "<script type=\"text/javascript\">//<![CDATA[\nalert(\"Hello World\")\n// ]]></script>");
+        "<script type=\"text/javascript\">//<![CDATA[\n//\nalert(\"Hello World\")\n// ]]></script>");
 
         assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n"
                 + "// \n"
@@ -301,8 +301,8 @@ public class CDATATest extends AbstractHtmlCleanerTest {
         	//
         	// We should have a CData node for the CDATA section
         	//
-        	assertTrue(script.getAllChildren().get(2) instanceof CData);
-        	CData cdata = (CData)script.getAllChildren().get(2);
+        	assertTrue(script.getAllChildren().get(1) instanceof CData);
+        	CData cdata = (CData)script.getAllChildren().get(1);
         	
         	String content = cdata.getContentWithoutStartAndEndTokens();
         	assertEquals("\nfunction escapeForXML(origtext) {\n return origtext.replace(/\\&/g,'&'+'amp;').replace(/</g,'&'+'lt;')\n .replace(/>/g,'&'+'gt;').replace(/'/g,'&'+'apos;').replace(/\"/g,'&'+'quot;');}\n", content);
@@ -365,7 +365,7 @@ public class CDATATest extends AbstractHtmlCleanerTest {
     	cleaner.getProperties().setOmitXmlDeclaration(false);
     	cleaner.getProperties().setAddNewlineToHeadAndBody(false);
     	assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n//\nalert(\"Hello World\")\n// \n/*]]>*/</script>",
-    			   "<script type=\"text/javascript\">//<![CDATA[\nalert(\"Hello World\")\n// ]]></script>"
+    			   "<script type=\"text/javascript\">//<![CDATA[\n//\nalert(\"Hello World\")\n// ]]></script>"
     	);
     }
 

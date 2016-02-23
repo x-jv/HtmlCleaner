@@ -38,10 +38,121 @@ import java.io.IOException;
 
 import org.jdom2.Document;
 import org.jdom2.Namespace;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.junit.Test;
 
 public class JDomSerializerTest extends AbstractHtmlCleanerTest {
 
+	/**
+	 * Tests that we comment CDATA in JDom
+	 * @throws IOException
+	 */
+	@Test
+	public void SafeCData1() throws IOException{
+		String initial = "<head><script type=\"text/javascript\"><![CDATA[alert(\"Hello World\")]]></script></head>";
+		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<html><head><script type=\"text/javascript\">//<![CDATA[\nalert(\"Hello World\")\n//]]></script></head><body /></html>\n";
+		CleanerProperties props = new CleanerProperties();
+		props.setOmitCdataOutsideScriptAndStyle(true);
+		props.setAddNewlineToHeadAndBody(false);
+		TagNode tagNode = new HtmlCleaner(props).clean(initial);
+		Document doc = new JDomSerializer(props, true).createJDom(tagNode);
+		XMLOutputter outputter = new XMLOutputter(Format.getRawFormat().setEncoding("UTF-8").setLineSeparator("\n"));
+		String output = outputter.outputString(doc);
+		assertEquals(expected, output);		
+	}
+	
+	/**
+	 * Tests that we comment CDATA in JDom; in this case preserving existing comments
+	 * @throws IOException
+	 */
+	@Test
+	public void SafeCData2() throws IOException{
+		String initial = "<head><script type=\"text/javascript\">//<![CDATA[\nalert(\"Hello World\")\n//]]></script></head>";
+		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<html><head><script type=\"text/javascript\">//<![CDATA[\nalert(\"Hello World\")\n//]]></script></head><body /></html>\n";
+		CleanerProperties props = new CleanerProperties();
+		props.setOmitCdataOutsideScriptAndStyle(true);
+		props.setAddNewlineToHeadAndBody(false);
+		TagNode tagNode = new HtmlCleaner(props).clean(initial);
+		Document doc = new JDomSerializer(props, true).createJDom(tagNode);
+		XMLOutputter outputter = new XMLOutputter(Format.getRawFormat().setEncoding("UTF-8").setLineSeparator("\n"));
+		String output = outputter.outputString(doc);
+		assertEquals(expected, output);		
+	}
+	
+	/**
+	 * Tests that we comment CDATA in JDom; in this case that we normalise comment style
+	 * @throws IOException
+	 */
+	@Test
+	public void SafeCData3() throws IOException{
+		String initial = "<head><script type=\"text/javascript\">/*<![CDATA[*/alert(\"Hello World\")\n/*]]>*/</script></head>";
+		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<html><head><script type=\"text/javascript\">//<![CDATA[\nalert(\"Hello World\")\n//]]></script></head><body /></html>\n";
+		CleanerProperties props = new CleanerProperties();
+		props.setOmitCdataOutsideScriptAndStyle(true);
+		props.setAddNewlineToHeadAndBody(false);
+		TagNode tagNode = new HtmlCleaner(props).clean(initial);
+		Document doc = new JDomSerializer(props, true).createJDom(tagNode);
+		XMLOutputter outputter = new XMLOutputter(Format.getRawFormat().setEncoding("UTF-8").setLineSeparator("\n"));
+		String output = outputter.outputString(doc);
+		assertEquals(expected, output);		
+	}
+	
+	/**
+	 * Tests that we comment CDATA in JDom; in this case a more complex example
+	 * @throws IOException
+	 */
+	@Test
+	public void SafeCData4() throws IOException{
+		String initial = readFile("src/test/resources/test33.html");
+		String expected = readFile("src/test/resources/test33_expected.html");;
+		CleanerProperties props = new CleanerProperties();
+		props.setOmitCdataOutsideScriptAndStyle(true);
+		props.setAddNewlineToHeadAndBody(false);
+		TagNode tagNode = new HtmlCleaner(props).clean(initial);
+		Document doc = new JDomSerializer(props, true).createJDom(tagNode);
+		XMLOutputter outputter = new XMLOutputter(Format.getRawFormat().setEncoding("UTF-8").setLineSeparator("\n"));
+		String output = outputter.outputString(doc);
+		assertEquals(expected, output);		
+	}
+	
+	/**
+	 * Tests that we comment CDATA in JDom
+	 * @throws IOException
+	 */
+	@Test
+	public void SafeCData5() throws IOException{
+		String initial = "<head><script><></script></head>";
+		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<html><head><script>//<![CDATA[\n<>\n//]]></script></head><body /></html>\n";
+		CleanerProperties props = new CleanerProperties();
+		props.setOmitCdataOutsideScriptAndStyle(true);
+		props.setUseCdataForScriptAndStyle(true);
+		props.setAddNewlineToHeadAndBody(false);
+		TagNode tagNode = new HtmlCleaner(props).clean(initial);
+		Document doc = new JDomSerializer(props, true).createJDom(tagNode);
+		XMLOutputter outputter = new XMLOutputter(Format.getRawFormat().setEncoding("UTF-8").setLineSeparator("\n"));
+		String output = outputter.outputString(doc);
+		assertEquals(expected, output);		
+	}
+	
+	/**
+	 * Tests that we comment CDATA in JDom; this test uses CSS 
+	 * @throws IOException
+	 */
+	@Test
+	public void SafeCData6() throws IOException{
+		String initial = "<head><style type=\"text/css\"><![CDATA[\na { color: red; }\n]]></style></head>";
+		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<html><head><style type=\"text/css\">/*<![CDATA[*/\na { color: red; }\n/*]]>*/</style></head><body /></html>\n";
+		CleanerProperties props = new CleanerProperties();
+		props.setOmitCdataOutsideScriptAndStyle(true);
+		props.setUseCdataForScriptAndStyle(true);
+		props.setAddNewlineToHeadAndBody(false);
+		TagNode tagNode = new HtmlCleaner(props).clean(initial);
+		Document doc = new JDomSerializer(props, true).createJDom(tagNode);
+		XMLOutputter outputter = new XMLOutputter(Format.getRawFormat().setEncoding("UTF-8").setLineSeparator("\n"));
+		String output = outputter.outputString(doc);
+		assertEquals(expected, output);		
+	}
 
 	/**
 	 * See issue #95
@@ -67,7 +178,7 @@ public class JDomSerializerTest extends AbstractHtmlCleanerTest {
     	TagNode tagNode = cleaner.clean(initial);
     	JDomSerializer ser = new JDomSerializer(cleaner.getProperties());
     	Document doc = ser.createJDom(tagNode);
-    	assertEquals("org.jdom2.CDATA", doc.getRootElement().getChild("head").getChild("script").getContent().get(0).getClass().getName());
+    	assertEquals("org.jdom2.CDATA", doc.getRootElement().getChild("head").getChild("script").getContent().get(1).getClass().getName());
     }
     
 	/**

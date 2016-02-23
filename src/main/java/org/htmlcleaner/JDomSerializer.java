@@ -17,6 +17,16 @@ import org.jdom2.Text;
  * </p>
  */
 public class JDomSerializer {
+	
+    private static final String CSS_COMMENT_START = "/*";
+
+    private static final String CSS_COMMENT_END = "*/";
+    
+    private static final String SCRIPT_TAG_NAME = "script";
+    
+    private static final String JS_COMMENT = "//";
+
+    private static final String NEW_LINE = "\n";
 
     private DefaultJDOMFactory factory;
 
@@ -161,16 +171,40 @@ public class JDomSerializer {
                         content = Utils.escapeXml(content, props, true);
                     }
                     
-                    //
-                    // For CDATA sections we don't want to return the start and
-                    // end tokens. See issue #106.
-                    //
                     if (specialCase && item instanceof CData){
+                        //
+                        // For CDATA sections we don't want to return the start and
+                        // end tokens. See issue #106.
+                        //
                     	content = ((CData)item).getContentWithoutStartAndEndTokens();
                     }
                     
-                    Text text = specialCase ? factory.cdata(content) : factory.text(content);
-                    element.addContent(text);
+                    //
+                    // Only create CDATA sections where there is meaningful content,
+                    // otherwise you get untidy CDATA blocks for newlines within the
+                    // script and style tags.
+                    //
+                    if (specialCase && Utils.bchomp(content).length() > 0){
+                    	//
+                    	// We wrap the CDATA content in comments as the JDOM XMLOutputter
+                    	// doesn't seem capable of doing this. See issue #169
+                    	//
+                        if (SCRIPT_TAG_NAME.equalsIgnoreCase(element.getName())) {
+                            // JS
+                            element.addContent(factory.text(JS_COMMENT));
+                            element.addContent(factory.cdata(NEW_LINE + Utils.bchomp(content) + NEW_LINE + JS_COMMENT));
+                        } else {
+                            // CSS
+                        	element.addContent(factory.text(CSS_COMMENT_START));
+                            element.addContent(factory.cdata(CSS_COMMENT_END + Utils.chomp(content) + NEW_LINE + CSS_COMMENT_START));
+                            element.addContent(factory.text(CSS_COMMENT_END));
+                        }
+
+                    } else {
+                    	Text text = factory.text(content);
+                    	element.addContent(text);
+
+                    }
                 } else if (item instanceof TagNode) {
                     TagNode subTagNode = (TagNode) item;
                     Element subelement = createElement(subTagNode);
