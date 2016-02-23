@@ -72,6 +72,7 @@ public class SpecialEntities {
 	public SpecialEntities(boolean greek, boolean math) {
 	    this.greek = greek;
 	    this.math = math;
+	    _put(new SpecialEntity("null",	0, "", true));
 		_put(new SpecialEntity("nbsp",	NON_BREAKABLE_SPACE, null, true));
 		_put(new SpecialEntity("iexcl",	161, null, true));
 		_put(new SpecialEntity("cent",	162, null, true));
