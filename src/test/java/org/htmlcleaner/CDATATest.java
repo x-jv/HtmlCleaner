@@ -37,7 +37,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class CDATATest extends AbstractHtmlCleanerTest {
@@ -162,18 +161,15 @@ public class CDATATest extends AbstractHtmlCleanerTest {
         assertHTML("<altscript>/*<![CDATA[*/\n<>\n/*]]>*/</altscript>", "<altscript><></altscript>");
     }
 
-    //
-    // This is a specific test over at XWiki that we currently don't pass
-    //
-    // TODO I've set this to IGNORE to allow us to build 2.7. It should be enabled after this is released so we can resolve it.
-    @Ignore
     @Test
     public void escapingCDATA() throws IOException{
         CleanerProperties cleanerProperties = new CleanerProperties();
         cleanerProperties.setOmitXmlDeclaration(false);
         cleanerProperties.setOmitDoctypeDeclaration(false);
         cleanerProperties.setIgnoreQuestAndExclam(false);
+        cleanerProperties.setAdvancedXmlEscape(true);
         cleanerProperties.setAddNewlineToHeadAndBody(false);
+        cleanerProperties.setDeserializeEntities(true);
         cleanerProperties.setUseCdataFor("script,style,altscript");
         this.cleaner = new HtmlCleaner(cleanerProperties);
         this.serializer = new SimpleXmlSerializer(cleaner.getProperties());
@@ -366,6 +362,15 @@ public class CDATATest extends AbstractHtmlCleanerTest {
     	cleaner.getProperties().setAddNewlineToHeadAndBody(false);
     	assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n//\nalert(\"Hello World\")\n// \n/*]]>*/</script>",
     			   "<script type=\"text/javascript\">//<![CDATA[\n//\nalert(\"Hello World\")\n// ]]></script>"
+    	);
+    }
+    
+    @Test
+    public void preserveComments2() throws IOException{
+    	cleaner.getProperties().setOmitXmlDeclaration(false);
+    	cleaner.getProperties().setAddNewlineToHeadAndBody(false);
+    	assertHTML("<script type=\"text/javascript\">/*<![CDATA[*/\n//alert(\"Hello World\")\n/*]]>*/</script>",
+    			   "<script type=\"text/javascript\"><![CDATA[//alert(\"Hello World\")]]></script>"
     	);
     }
 

@@ -122,11 +122,12 @@ public class JDomSerializerTest extends AbstractHtmlCleanerTest {
 	 */
 	@Test
 	public void SafeCData5() throws IOException{
-		String initial = "<head><script><></script></head>";
+		String initial = "<head><script>&lt;&gt;</script></head>";
 		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<html><head><script>//<![CDATA[\n<>\n//]]></script></head><body /></html>\n";
 		CleanerProperties props = new CleanerProperties();
 		props.setOmitCdataOutsideScriptAndStyle(true);
 		props.setUseCdataForScriptAndStyle(true);
+		props.setDeserializeEntities(true);
 		props.setAddNewlineToHeadAndBody(false);
 		TagNode tagNode = new HtmlCleaner(props).clean(initial);
 		Document doc = new JDomSerializer(props, true).createJDom(tagNode);
