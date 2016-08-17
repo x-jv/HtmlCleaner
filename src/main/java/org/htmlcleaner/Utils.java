@@ -431,11 +431,11 @@ public class Utils {
         	    char[] unicodeChar = null;    
         	    if (isHex){
         	    	codePoint = Integer.parseInt(unicode.substring(1), 16);
-        	    	unicodeChar = Character.toChars(codePoint);
         	    } else {
         	    	codePoint = Integer.parseInt(unicode.toString());
-        	    	unicodeChar =  Character.toChars(codePoint);
         	    }
+    	    	
+        	    unicodeChar = Character.toChars(codePoint);
         	    
         	    SpecialEntity specialEntity = SpecialEntities.INSTANCE.getSpecialEntityByUnicode(codePoint);
                 if (unicodeChar.length == 1 && unicodeChar[0] == 0) {
@@ -462,6 +462,10 @@ public class Utils {
         		}
         	} catch (NumberFormatException e) {
         	    // should never happen now
+        		result.append("&amp;#").append(unicode).append(";" );
+        	}
+        	catch (IllegalArgumentException e) {
+        	    // code point is not a legal unicode character
         		result.append("&amp;#").append(unicode).append(";" );
         	}
         } else {
