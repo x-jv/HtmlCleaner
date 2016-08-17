@@ -849,7 +849,12 @@ public class HtmlCleaner {
                         			//   </table> -- will try to reopen table, but table is now  a List
 
                         			List<TagNode> tagNodes = (List<TagNode>) toReopen;
-
+                        			
+                        			//
+                        			// We may have nested lists, in which case we need to flatten it first
+                        			//
+									tagNodes = flattenNestedList(tagNodes);
+									
                         			for(TagNode n : tagNodes) {
                         				if (Thread.currentThread().isInterrupted()) {
                             	    		// TODO Interruption
@@ -1113,6 +1118,23 @@ public class HtmlCleaner {
         return matches == 3;
     }
 
+    /**
+     * Flattens a list of tagnodes
+     */
+    private List<TagNode> flattenNestedList(List list){
+    	ArrayList<TagNode>flattenedNodeList = new ArrayList<TagNode>();
+    	for (Object item : list){
+    		if (item instanceof TagNode){
+    			flattenedNodeList.add((TagNode)item);
+    		} else {
+    			if (item instanceof List){
+    					flattenedNodeList.addAll((List<TagNode>)item);
+    			}
+    		}
+    	}
+    	return flattenedNodeList;
+    }
+    
     /**
      * Determines if two copied tokens are equal.
      */
