@@ -1,14 +1,173 @@
 package org.htmlcleaner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class HtmlCleanerTest extends AbstractHtmlCleanerTest {
+	
+	//
+	// Test for bug #178
+	//
+	@Test
+	public void arrayError(){
+
+		final String HTML = 
+				"<html>"
+						+ "<body>"
+						+ "<table>"
+						+ "<ul>"
+						+ "<p>d</p>"
+						+ "</ul>"
+						+ "<table>"
+						+ "</table>"
+						+ "</body>"
+						+ "</html>";
+
+		final HtmlCleaner cleaner = new HtmlCleaner();  
+		cleaner.clean(HTML);
+	}
+	
+	//
+	// See issue #118
+	//
+	@Test
+	public void nbsp() throws IOException{
+		String html = "<b>One&nbsp;</b>Two";
+		
+	    ByteArrayOutputStream htmlOutputStream = new ByteArrayOutputStream();
+
+		HtmlCleaner cleaner = new HtmlCleaner();
+	    CleanerProperties props = cleaner.getProperties();
+	    props.setTranslateSpecialEntities(false);
+	    TagNode node = cleaner.clean(html);
+	    new SimpleHtmlSerializer(props).writeToStream(node, htmlOutputStream);
+	    String htmlcontent = htmlOutputStream.toString();
+	    assertTrue(htmlcontent.contains("<b>One&nbsp;</b>Two"));
+	}
+	
+	//
+	// See issue #118
+	//
+	@Test
+	public void pound() throws IOException{
+		String html = "<b>&pound;160</b>";
+		
+	    ByteArrayOutputStream htmlOutputStream = new ByteArrayOutputStream();
+
+		HtmlCleaner cleaner = new HtmlCleaner();
+	    CleanerProperties props = cleaner.getProperties();
+	    props.setTranslateSpecialEntities(false);
+	    TagNode node = cleaner.clean(html);
+	    new SimpleHtmlSerializer(props).writeToStream(node, htmlOutputStream);
+	    String htmlcontent = htmlOutputStream.toString();
+	    assertTrue(htmlcontent.contains("<b>&pound;160</b>"));
+	}
+	
+	//
+	// Test for issue #176
+	//
+	@Test
+    public void invalidIUnicodeCodePoint()
+    {
+        final String HTML = "<html>"
+                + "<body>Brine&#2013266066;s."
+                + "</body>"
+                + "</html>";
+        try
+        {
+            final TagNode tagNode = new HtmlCleaner().clean(HTML);
+            final CleanerProperties cleanerProperties = new CleanerProperties();
+            new DomSerializer(cleanerProperties).createDOM(tagNode);
+        }
+        catch (IllegalArgumentException e)
+        {
+            fail();
+        }
+        catch (ParserConfigurationException e)
+        {
+            fail();
+        }
+    }
+	
+	//
+	// Tests for \u0000 (UTF8 Null) - see issue #165
+	//
+	@Test
+	public void UTFnulls() throws IOException{
+        String input = "<html><body>\u0000</body></html>";
+        InputStream is = new ByteArrayInputStream(input.getBytes());
+
+        HtmlCleaner cleaner = new HtmlCleaner();
+        cleaner.getProperties().setTranslateSpecialEntities(true);
+        TagNode html = cleaner.clean(is, "UTF-8");
+
+        String cleanHtml = new SimpleXmlSerializer(cleaner.getProperties()).getAsString(html);
+        if(cleanHtml.contains("\u0000")) throw new AssertionError("U+0000 is an invalid XHTML char.");
+	}
+	
+	@Test
+	public void whiteSpace() throws IOException{
+		String html = "<b>One </b>Two";
+		TagNode node = cleaner.clean(html);
+		StringWriter writer = new StringWriter();
+		new PrettyHtmlSerializer(cleaner.getProperties(), " ")
+				.serialize(node, writer);
+
+	}
+	
+	//
+	// MathML-specific test
+	//
+	@Ignore
+	@Test public void mtdMissingParentDefinition() throws IOException{ 
+		String initial = "<math><mtable><mtr><mtd>S</mtd></mtr></mtable></math>"; 
+		String expected = "<html><head /><body><math><mtable><mtr><mtd>S</mtd></mtr></mtable></math></body></html>"; 
+		cleaner.getProperties().setAddNewlineToHeadAndBody(false); 
+		cleaner.getProperties().setNamespacesAware(true); 
+		TagNode cleaned = cleaner.clean(initial);
+		String output = serializer.getAsString(cleaned); 
+		assertEquals(expected, output); 
+	}
+
+	@Test
+	public void testScriptEscape() throws IOException
+	{
+		final String input = "<head><script>a &lt; b</script></head>";
+		HtmlCleaner cleaner = new HtmlCleaner();
+		cleaner.getProperties().setUseCdataForScriptAndStyle(true);
+		cleaner.getProperties().setAdvancedXmlEscape(true);
+		cleaner.getProperties().setDeserializeEntities(true);
+		TagNode cleaned = cleaner.clean(input);
+			StringWriter writer = new StringWriter();
+			serializer = new SimpleXmlSerializer(cleaner.getProperties());
+			serializer.write(cleaned, writer, "UTF-8");
+			System.out.println(writer.toString());
+	}
+
+	
+	@Test
+	public void testEscape() throws IOException
+	{
+		final String input = "<html><body><pre class=\"executable\">&lt;?xml version=\"1.0\"?&gt;<Root></Root></pre></body></html>";
+		HtmlCleaner cleaner = new HtmlCleaner();
+		TagNode cleaned = cleaner.clean(input);
+			StringWriter writer = new StringWriter();
+			serializer = new PrettyHtmlSerializer(cleaner.getProperties());
+			serializer.write(cleaned, writer, "UTF-8");
+			System.out.println(writer.toString());
+	}
 
 	/**
 

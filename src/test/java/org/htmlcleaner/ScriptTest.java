@@ -17,6 +17,18 @@ import org.junit.Test;
 public class ScriptTest extends AbstractHtmlCleanerTest {
 	
 	@Test
+	public void another() throws IOException{
+		HtmlCleaner htmlCleaner = new HtmlCleaner();
+		CleanerProperties props = htmlCleaner.getProperties();
+		props.setAllowHtmlInsideAttributes(true);
+		props.setAllowMultiWordAttributes(true);
+		props.setRecognizeUnicodeChars(true);
+		props.setOmitComments(true);
+		TagNode rootNode = htmlCleaner.clean(new File("src/test/resources/script_test.html"));
+	}
+	
+	
+	@Test
 	public void getScripts() throws IOException{
 	    HtmlCleaner cleaner = new HtmlCleaner();
         TagNode html = cleaner.clean( new File("src/test/resources/script_test.html") );
