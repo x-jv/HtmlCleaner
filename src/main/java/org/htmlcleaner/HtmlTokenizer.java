@@ -127,11 +127,14 @@ public class HtmlTokenizer {
     		
             }
 
-            // convert invalid XML characters to spaces
+            // convert invalid XML characters to spaces or the UTF replacement character
             for (int i = 0; i < (_len >= 0 ? _len : WORKING_BUFFER_SIZE); i++) {
                 int ch = _working[i];
                 if (ch >= 1 && ch <= 32 && ch != 10 && ch != 13) {
                     _working[i] = ' ';
+                }
+                if (ch == 0){
+                	_working[i] = '\uFFFD'; 
                 }
             }
         }
