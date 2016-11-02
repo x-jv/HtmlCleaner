@@ -103,6 +103,7 @@
               <configuration>
                    <instructions>
                        <Export-Package>org.htmlcleaner.*</Export-Package>
+                       <Main-Class>org.htmlcleaner.CommandLine</Main-Class>
                    </instructions>
               </configuration>
            </plugin>
